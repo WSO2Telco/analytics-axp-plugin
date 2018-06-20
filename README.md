@@ -10,7 +10,7 @@ Enable Request ID and Payload Logging
 Follow below three steps for enabling request ID and payload logging
 
 1) Apply logging-extension-1.0.0-SNAPSHOT.jar to API Manager;
-        a) Copy and paste the 'logging-extension-1.0.0-SNAPSHOT.jar' in to deployed api manager lib directory. (Patch source is available under "/wso2am-2.0.0/repository/components/lib".)
+        a) Copy and paste the 'logging-extension-1.0.0-SNAPSHOT.jar' in to deployed api manager lib directory. (Patch source is available under "/wso2telcohub/repository/components/lib".)
 
                 The actual deployment path is as follows;
                 wso2telcohub-2.0.0/repository/components/dropins
@@ -18,7 +18,7 @@ Follow below three steps for enabling request ID and payload logging
 
 
 2) Enable Log4J properties for the newly installed feature
-	a) Open the log4j.properties file which is located in wso2telcohub-2.0.0/repository/conf folder
+	a) Open the log4j.properties file which is located in wso2telcohub/repository/conf folder
 	b) Add below entries at the end of the file opened in step (a)
 
 		log4j.logger.com.wso2telco.dep=DEBUG
@@ -51,7 +51,7 @@ Follow below three steps for enabling request ID and payload logging
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
 
-(Synapse Configurations related to apis are located at wso2telcohub-2.0.0/repository/deployment/server/synapse-configs/default/api)
+(Synapse Configurations related to apis are located at wso2telcohub/repository/deployment/server/synapse-configs/default/api)
 
 Enable Payload body from registry
 =================================
