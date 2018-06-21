@@ -20,7 +20,7 @@
     <properties>
         <CApp.type>lib/synapse/mediator</CApp.type>
     </properties>
-    <groupId>org.wso2.carbon.apimgt.axiata.dialog.verifier</groupId>
+    <groupId>com.wso2telco</groupId>
     <artifactId>logging-extension</artifactId>
     <name>logging-extension</name>
     <version>1.0.0-SNAPSHOT</version>
