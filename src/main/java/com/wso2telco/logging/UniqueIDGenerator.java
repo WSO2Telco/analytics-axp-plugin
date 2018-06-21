@@ -23,29 +23,11 @@ public class UniqueIDGenerator {
 	private static long id;
     private static final String REQUEST_ID = "mife.prop.requestId";
 
+    private UniqueIDGenerator(){}
+
     public static synchronized String generateAndSetUniqueID(String axtype, MessageContext context,String appid) {       
         String requestId = System.currentTimeMillis()+axtype+appid+"0"+ id++;
         context.setProperty(REQUEST_ID, requestId);
         return requestId;
-    }
-    
-    public static String resourceURL(String resUrl,String reqid) {        
-       return resUrl.substring(0,resUrl.lastIndexOf("/")+1)+reqid;
-    }
-    
-    public static String resourceURLWithappend(String resUrl,String reqid, String msg) {        
-       return resUrl.substring(0,resUrl.lastIndexOf("/")+1)+reqid+"/"+msg;
-    }
-    
-    public static String retriveMsgResourceURL(String resUrl, String msg){
-        return resUrl.substring(0,resUrl.lastIndexOf("/")+1)+msg;
-    }
-    
-    public static String getRequestID(MessageContext messageContext) {
-    	String requestId = "";
-    	if (messageContext != null) {
-        	requestId = (String) messageContext.getProperty(REQUEST_ID);
-    	}
-    	return requestId;
     }
 }
