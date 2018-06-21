@@ -16,12 +16,7 @@
 
 package com.wso2telco.logging;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.axiom.om.impl.llom.OMTextImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,8 +27,6 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 
 public class PropertyLogHandler extends AbstractMediator {
-
-	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private static final String REGISTRY_PATH = "gov:/apimgt/";
 	private static final String REQUEST_ID = "mife.prop.requestId";
@@ -47,6 +40,7 @@ public class PropertyLogHandler extends AbstractMediator {
 	private static final String API_VERSION ="SYNAPSE_REST_API_VERSION";
 	private static final String API_CONTEXT = "api.ut.context";
 	private static final String USER_ID="api.ut.userId";
+	private static final String JWT="X-JWT-Assertion";
 
 	private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
@@ -58,9 +52,7 @@ public class PropertyLogHandler extends AbstractMediator {
 				.getAxis2MessageContext();
 
 		isPayloadLoggingEnabled = extractPayloadLoggingStatus(messageContext);
-
 		String direction = (String) axis2MessageContext.getProperty(MESSAGE_TYPE);
-
 		if (direction != null && direction.equalsIgnoreCase(REQUEST)) {
 			logRequestProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled);
 		} else if (direction != null && direction.equalsIgnoreCase(RESPONSE)) {
@@ -73,23 +65,20 @@ public class PropertyLogHandler extends AbstractMediator {
 	private void logRequestProperties(MessageContext messageContext,
 			org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
 
-		String requestId = (String) messageContext.getProperty(REQUEST_ID);
-
 		TreeMap<String,String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-		String jwzToken=headers.get("X-JWT-Assertion");
+		String requestId = (String) messageContext.getProperty(REQUEST_ID);
+		String jwzToken=headers.get(JWT);
 
 		if (nullOrTrimmed(requestId) == null) {
 			UniqueIDGenerator.generateAndSetUniqueID("MI", messageContext,
 					(String) messageContext.getProperty(APPLICATION_ID));
 		}
 
-		logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(REQUEST_ID)+",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+",API_NAME:"+messageContext.getProperty(API_NAME)+",API_PUBLISHER:"+
-				messageContext.getProperty(API_PUBLISHER)+",API_VERSION,"+messageContext.getProperty(API_VERSION)
-				+",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+",USER_ID:"+messageContext.getProperty(USER_ID)+"jwzToken"+jwzToken);
-		
 		if (isPayloadLoggingEnabled) {
 			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(REQUEST_ID)+">>>>> reqBody :" + jsonBody);
+			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(REQUEST_ID)+",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+",API_NAME:"+messageContext.getProperty(API_NAME)+",API_PUBLISHER:"+
+					messageContext.getProperty(API_PUBLISHER)+",API_VERSION,"+messageContext.getProperty(API_VERSION)
+					+",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+",USER_ID:"+messageContext.getProperty(USER_ID)+"jwzToken"+jwzToken+">>>>> reqBody :" + jsonBody.replaceAll("\n",""));
 		}
 
 	}
@@ -97,13 +86,9 @@ public class PropertyLogHandler extends AbstractMediator {
 	private void logResponseProperties(MessageContext messageContext,
 			org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
 
-
-		logHandler.info("[" + dateFormat.format(new Date()) + "] <<<<< API Request id "
-				+ messageContext.getProperty(REQUEST_ID));
-		
 		if (isPayloadLoggingEnabled) {
 			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(REQUEST_ID)+" <<<<< respBody :" + jsonBody);
+			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(REQUEST_ID)+" <<<<< respBody :" + jsonBody.replaceAll("\n",""));
 		}
 
 	}
