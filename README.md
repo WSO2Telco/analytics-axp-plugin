@@ -21,7 +21,7 @@ Follow below three steps for enabling request ID and payload logging
 	a) Open the log4j.properties file which is located in wso2telcohub/repository/conf folder
 	b) Add below entries at the end of the file opened in step (a)
 
-		log4j.logger.com.wso2telco.dep=DEBUG
+		log4j.logger.com.wso2telco.logging=DEBUG
 
 		# The request response logger failed events when trying to publish events
         # This works only with notifyEvent mediator
