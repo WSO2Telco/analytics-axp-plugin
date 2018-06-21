@@ -41,6 +41,7 @@ public class PropertyLogHandler extends AbstractMediator {
 	private static final String API_CONTEXT = "api.ut.context";
 	private static final String USER_ID="api.ut.userId";
 	private static final String JWT="X-JWT-Assertion";
+	private static final String UUID = "MESSAGE_ID";
 
 	private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
@@ -76,9 +77,9 @@ public class PropertyLogHandler extends AbstractMediator {
 
 		if (isPayloadLoggingEnabled) {
 			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(REQUEST_ID)+",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+",API_NAME:"+messageContext.getProperty(API_NAME)+",API_PUBLISHER:"+
+			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(UUID)+",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+",API_NAME:"+messageContext.getProperty(API_NAME)+",API_PUBLISHER:"+
 					messageContext.getProperty(API_PUBLISHER)+",API_VERSION,"+messageContext.getProperty(API_VERSION)
-					+",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+",USER_ID:"+messageContext.getProperty(USER_ID)+"jwzToken"+jwzToken+">>>>> reqBody :" + jsonBody.replaceAll("\n",""));
+					+",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+",USER_ID:"+messageContext.getProperty(USER_ID)+"jwzToken,"+jwzToken+">>>>> reqBody :" + jsonBody.replaceAll("\n",""));
 		}
 
 	}
@@ -88,7 +89,7 @@ public class PropertyLogHandler extends AbstractMediator {
 
 		if (isPayloadLoggingEnabled) {
 			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(REQUEST_ID)+" <<<<< respBody :" + jsonBody.replaceAll("\n",""));
+			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(UUID)+" <<<<< respBody :" + jsonBody.replaceAll("\n",""));
 		}
 
 	}
