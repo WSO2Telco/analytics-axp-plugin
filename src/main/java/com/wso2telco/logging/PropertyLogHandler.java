@@ -29,7 +29,6 @@ import org.apache.synapse.mediators.AbstractMediator;
 public class PropertyLogHandler extends AbstractMediator {
 
 	private static final String REGISTRY_PATH = "gov:/apimgt/";
-	private static final String REQUEST_ID = "mife.prop.requestId";
 	private static final String MESSAGE_TYPE = "message.type";
 	private static final String PAYLOAD_LOGGING_ENABLED = "payload.logging.enabled";
 	private static final String APPLICATION_ID = "api.ut.application.id";
@@ -67,19 +66,13 @@ public class PropertyLogHandler extends AbstractMediator {
 			org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
 
 		TreeMap<String,String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-		String requestId = (String) messageContext.getProperty(REQUEST_ID);
-		String jwzToken=headers.get(JWT);
-
-		if (nullOrTrimmed(requestId) == null) {
-			UniqueIDGenerator.generateAndSetUniqueID("MI", messageContext,
-					(String) messageContext.getProperty(APPLICATION_ID));
-		}
+		String jwtToken=headers.get(JWT);
 
 		if (isPayloadLoggingEnabled) {
 			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(UUID)+",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+",API_NAME:"+messageContext.getProperty(API_NAME)+",API_PUBLISHER:"+
-					messageContext.getProperty(API_PUBLISHER)+",API_VERSION,"+messageContext.getProperty(API_VERSION)
-					+",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+",USER_ID:"+messageContext.getProperty(USER_ID)+"jwzToken,"+jwzToken+">>>>> reqBody :" + jsonBody.replaceAll("\n",""));
+			logHandler.info("TRANSACTION:request,API_REQUEST_ID:"+messageContext.getProperty(UUID)+",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+",API_NAME:"+messageContext.getProperty(API_NAME)+",API_PUBLISHER:"+
+					messageContext.getProperty(API_PUBLISHER)+",API_VERSION:"+messageContext.getProperty(API_VERSION)
+					+",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+",USER_ID:"+messageContext.getProperty(USER_ID)+",jwtToken:"+jwtToken+",body:" + jsonBody.replaceAll("\n",""));
 		}
 
 	}
@@ -89,7 +82,7 @@ public class PropertyLogHandler extends AbstractMediator {
 
 		if (isPayloadLoggingEnabled) {
 			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("API_REQUEST_ID:"+messageContext.getProperty(UUID)+" <<<<< respBody :" + jsonBody.replaceAll("\n",""));
+			logHandler.info("TRANSACTION:response,API_REQUEST_ID:"+messageContext.getProperty(UUID)+",body:" + jsonBody.replaceAll("\n",""));
 		}
 
 	}
