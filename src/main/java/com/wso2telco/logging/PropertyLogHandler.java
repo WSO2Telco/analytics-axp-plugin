@@ -21,7 +21,6 @@ import org.apache.axiom.om.impl.llom.OMTextImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -41,6 +40,16 @@ public class PropertyLogHandler extends AbstractMediator {
 	private static final String USER_ID="api.ut.userId";
 	private static final String JWT="X-JWT-Assertion";
 	private static final String UUID = "MESSAGE_ID";
+	private static final String ERROR="error";
+	private static final String REQUEST_ID = "mife.prop.requestId";
+	private static final String APPLICATION_NAME = "api.ut.application.name";
+	private static final String  REST_FULL_REQUEST_PATH="REST_FULL_REQUEST_PATH";
+	private static final String  SYNAPSE_REST_API="SYNAPSE_REST_API";
+	private static final String  ERROR_EXCEPTION="ERROR_EXCEPTION";
+	private static final String  API_RESOURCE_CACHE_KEY="API_RESOURCE_CACHE_KEY";
+	private static final String  ERROR_MESSAGE="ERROR_MESSAGE";
+	private static final String  ERROR_CODE="ERROR_CODE";
+	private static final String  HTTP_SC= "HTTP_SC";
 
 	private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
@@ -50,13 +59,14 @@ public class PropertyLogHandler extends AbstractMediator {
 
 		org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
 				.getAxis2MessageContext();
-
 		isPayloadLoggingEnabled = extractPayloadLoggingStatus(messageContext);
 		String direction = (String) axis2MessageContext.getProperty(MESSAGE_TYPE);
 		if (direction != null && direction.equalsIgnoreCase(REQUEST)) {
 			logRequestProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled);
 		} else if (direction != null && direction.equalsIgnoreCase(RESPONSE)) {
 			logResponseProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled);
+		} else if (direction != null && direction.equalsIgnoreCase(ERROR)) {
+			logErrorProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled);
 		}
 
 		return true;
@@ -64,27 +74,52 @@ public class PropertyLogHandler extends AbstractMediator {
 
 	private void logRequestProperties(MessageContext messageContext,
 			org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
-
 		TreeMap<String,String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 		String jwtToken=headers.get(JWT);
-
 		if (isPayloadLoggingEnabled) {
-			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("TRANSACTION:request,API_REQUEST_ID:"+messageContext.getProperty(UUID)+",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+",API_NAME:"+messageContext.getProperty(API_NAME)+",API_PUBLISHER:"+
-					messageContext.getProperty(API_PUBLISHER)+",API_VERSION:"+messageContext.getProperty(API_VERSION)
-					+",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+",USER_ID:"+messageContext.getProperty(USER_ID)+",jwtToken:"+jwtToken+",body:" + jsonBody.replaceAll("\n",""));
+			String requestPayload = messageContext.getEnvelope().getBody().toString();
+			logHandler.info("TRANSACTION:request,API_REQUEST_ID:"+messageContext.getProperty(UUID)+"" +
+					",API_NAME:"+messageContext.getProperty(API_NAME)+"" +
+					",API_PUBLISHER:"+messageContext.getProperty(API_PUBLISHER)+"" +
+					",API_VERSION:"+messageContext.getProperty(API_VERSION)+
+					",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+
+					",APPLICATION_NAME	:"+messageContext.getProperty(APPLICATION_NAME)+
+					",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+"" +
+					",USER_ID:"+messageContext.getProperty(USER_ID)+
+					",JWT_TOKEN:"+jwtToken+"" +
+					",BODY:" + requestPayload.replaceAll("\n",""));
 		}
-
 	}
 
 	private void logResponseProperties(MessageContext messageContext,
 			org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
-
 		if (isPayloadLoggingEnabled) {
-			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-			logHandler.info("TRANSACTION:response,API_REQUEST_ID:"+messageContext.getProperty(UUID)+",body:" + jsonBody.replaceAll("\n",""));
-		}
+			String responsePayload = messageContext.getEnvelope().getBody().toString();
+			logHandler.info("TRANSACTION:response," +
+					"API_REQUEST_ID:"+messageContext.getProperty(UUID)+""+
+					",HTTP_STATUS:"+axis2MessageContext.getProperty(HTTP_SC)+""+
+					",BODY:" + responsePayload.replaceAll("\n",""));
+	  }
+	}
 
+	private void logErrorProperties(MessageContext messageContext,
+									   org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
+		UniqueIDGenerator.generateAndSetUniqueID("EX", axis2MessageContext);
+		if (isPayloadLoggingEnabled) {
+			logHandler.info("TRANSACTION:errorResponse," +
+					",API_REQUEST_ID:"+axis2MessageContext.getProperty(REQUEST_ID)+
+					",REQUEST_BODY:"+messageContext.getEnvelope().getBody().toString()+
+					",REST_FULL_REQUEST_PATH:"+messageContext.getProperty(REST_FULL_REQUEST_PATH)+
+					",SYNAPSE_REST_API:"+messageContext.getProperty(SYNAPSE_REST_API)+
+					",SYNAPSE_REST_API_VERSION:"+messageContext.getProperty(API_VERSION)+
+					",API_RESOURCE_CACHE_KEY:"+messageContext.getProperty(API_RESOURCE_CACHE_KEY)+
+					",ERROR_EXCEPTION:"+messageContext.getProperty(ERROR_EXCEPTION)+
+					",APPLICATION_NAME:"+messageContext.getProperty(APPLICATION_NAME)+
+					",APPLICATION_ID:"+messageContext.getProperty(APPLICATION_ID)+
+					",ERROR_CODE:"+messageContext.getProperty(ERROR_CODE)+
+					",HTTP_STATUS:"+axis2MessageContext.getProperty(HTTP_SC)+""+
+					",ERROR_MESSAGE:"+messageContext.getProperty(ERROR_MESSAGE));
+		}
 	}
 	
 	private boolean extractPayloadLoggingStatus (MessageContext messageContext) {

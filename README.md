@@ -50,6 +50,10 @@ Follow below three steps for enabling request ID and payload logging
 		<property name="message.type" scope="axis2" type="STRING" value="response"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
+    c) If the request ID and the payload of the error response from backend needs to be logged for a particular API, then the synapse configuration file related to that particular API has to be opened and below two entries have to be added as the first two elements inside the _cors_request_handler_.xml.
+        <property name="message.type" scope="axis2" type="STRING" value="error"/>
+        <class name="com.wso2telco.logging.PropertyLogHandler"/>
+
 
 (Synapse Configurations related to apis are located at wso2telcohub/repository/deployment/server/synapse-configs/default/api)
 
