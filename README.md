@@ -41,23 +41,22 @@ Follow below three steps for enabling request ID and payload logging
 
 
 3) Synapse changes for enabling Request ID and Payload Logging;
-    a) If the request ID and the payload of a request needs to be logged for a particular API, then added as the first two elements inside the WSO2AM-ExtIn.xml
+    a) If the request ID and the payload of a request needs to be logged for a all API, then added following two elements inside the sequence tag of WSO2AM-ExtIn.xml
     
 		<property name="message.type" scope="axis2" type="STRING" value="request"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-    b) If the request ID and the payload of the response from backend needs to be logged for All API,then added as the first two elements inside the WSO2AMExt-Out.xml
+    b) If the request ID and the payload of the response from backend needs to be logged for All API, then added following two elements inside the sequence tag of WSO2AMExt-Out.xml
 		
 		<property name="message.type" scope="axis2" type="STRING" value="response"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-    c) If the request ID and the payload of the error response from backend needs to be logged for a particular API, then the synapse configuration file related to that particular API has to be opened and below two entries have to be added as the first two elements inside the _throttle_out_handler_.xml and _token_fault_.xml
+    c) If the request ID and the payload of the error response from backend needs to be logged for a particular API, then added below two entries to _throttle_out_handler_.xml and_auth_failure_handler_.xml
     
 	  <property name="message.type" scope="axis2" type="STRING" value="error"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-
-(Synapse Configurations related to apis are located at wso2telcohub/repository/deployment/server/synapse-configs/default/api)
+(Synapse Configurations files located at wso2telcohub/repository/deployment/server/synapse-configs/default/sequences)
 
 Enable Payload body from registry
 =================================
@@ -70,10 +69,3 @@ go to _system/governance/apimgt
 3) Please insert Name: payload.logging.enabled and Content :true and save
 
 
-Enable Response Time Logging
-============================
-
-
-1) Enable Response Time Logging
-
-	a) If response time needs to be logged then copy WSO2AM--Ext--In.xml and WSO2AM--Ext--Out.xml sequences located in wso2am-2.0.0/repository/deployment/server/synapse-configs/default/sequences and paste those two files to wso2telcohub-2.0.0/repository/deployment/server/synapse-configs/default/sequences directory. This will enable response time logging for all the apis available.
