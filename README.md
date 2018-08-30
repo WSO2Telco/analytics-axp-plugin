@@ -41,17 +41,17 @@ Follow below three steps for enabling request ID and payload logging
 
 
 3) Synapse changes for enabling Request ID and Payload Logging;
-    a) If the request ID and the payload of a request needs to be logged for a particular API, then the synapse configuration file related to that particular API has to be opened and below two entries have to be added just before the send mediator in the inSequence.
-
+    a) If the request ID and the payload of a request needs to be logged for a particular API, then added as the first two elements inside the WSO2AM-ExtIn.xml
+    
 		<property name="message.type" scope="axis2" type="STRING" value="request"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-    b) If the request ID and the payload of the response from backend needs to be logged for a particular API, then the synapse configuration file related to that particular API has to be opened and below two entries have to be added as the first two elements inside the outSequence.
+    b) If the request ID and the payload of the response from backend needs to be logged for All API,then added as the first two elements inside the WSO2AMExt-Out.xml
 		
 		<property name="message.type" scope="axis2" type="STRING" value="response"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-    c) If the request ID and the payload of the error response from backend needs to be logged for a particular API, then the synapse configuration file related to that particular API has to be opened and below two entries have to be added as the first two elements inside the _cors_request_handler_.xml.
+    c) If the request ID and the payload of the error response from backend needs to be logged for a particular API, then the synapse configuration file related to that particular API has to be opened and below two entries have to be added as the first two elements inside the _throttle_out_handler_.xml and _token_fault_.xml
     
 	  <property name="message.type" scope="axis2" type="STRING" value="error"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
