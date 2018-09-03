@@ -83,7 +83,7 @@ public class PropertyLogHandler extends AbstractMediator {
 					",API_PUBLISHER:"+messageContext.getProperty(API_PUBLISHER)+"" +
 					",API_VERSION:"+messageContext.getProperty(API_VERSION)+
 					",API_CONTEXT:"+messageContext.getProperty(API_CONTEXT)+
-					",APPLICATION_NAME	:"+messageContext.getProperty(APPLICATION_NAME)+
+					",APPLICATION_NAME:"+messageContext.getProperty(APPLICATION_NAME)+
 					",APPLICATION_ID:"+(String) messageContext.getProperty(APPLICATION_ID)+"" +
 					",USER_ID:"+messageContext.getProperty(USER_ID)+
 					",JWT_TOKEN:"+jwtToken+"" +
