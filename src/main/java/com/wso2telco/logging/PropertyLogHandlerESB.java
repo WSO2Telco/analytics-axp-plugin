@@ -39,7 +39,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                                        org.apache.axis2.context.MessageContext axis2MessageContext, String direction) {
 
         String operation = (String) messageContext.getProperty("HANDLER");
-        
+
         if(operation.equals("AmountChargeHandler")){
             OPERATION ="Charge";
         }
@@ -53,12 +53,12 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                     ",API_NAME:" + messageContext.getProperty(API_NAME) +
                     ",API_VERSION:" + messageContext.getProperty(API_VERSION) +
                     ",RESOURSE:" + messageContext.getProperty(RESOURCE) +
-                    ",RESPONSETIME:" + messageContext.getProperty(RESPONSE_TIME)+
+                    ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME)+
                     ",OPERATION:" + OPERATION +
                     ",USER_ID:" + messageContext.getProperty(USER_ID) +
                     ",DIRECTION:" + messageContext.getProperty(DIRECTION) +
-                    ",OPERATORNAME:" + messageContext.getProperty(OPERATOR_NAME) +
-                    ",OPERATORID:" + messageContext.getProperty(OPERATOR_ID) +
+                    ",OPERATOR_NAME:" + messageContext.getProperty(OPERATOR_NAME) +
+                    ",OPERATOR_ID:" + messageContext.getProperty(OPERATOR_ID) +
                     ",Body:" + jsonBody.replaceAll("\n", ""));
         }
         else if(direction.equals("sb response")){
@@ -67,12 +67,12 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                     ",API_NAME:" + messageContext.getProperty(API_NAME) +
                     ",API_VERSION:" + messageContext.getProperty(API_VERSION) +
                     ",RESOURSE:" + messageContext.getProperty(RESOURCE) +
-                    ",RESPONSETIME:" + messageContext.getProperty(RESPONSE_TIME)+
+                    ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME)+
                     ",OPERATION:" + OPERATION +
                     ",USER_ID:" + messageContext.getProperty(USER_ID) +
                     ",DIRECTION:" + messageContext.getProperty(DIRECTION) +
-                    ",OPERATORNAME:" + messageContext.getProperty(OPERATOR_NAME) +
-                    ",OPERATORID:" + messageContext.getProperty(OPERATOR_ID) +
+                    ",OPERATOR_NAME:" + messageContext.getProperty(OPERATOR_NAME) +
+                    ",OPERATOR_ID:" + messageContext.getProperty(OPERATOR_ID) +
                     ",Body:" + jsonBody.replaceAll("\n", ""));
         }
 
