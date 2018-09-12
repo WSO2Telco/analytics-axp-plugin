@@ -53,7 +53,7 @@ Follow below three steps for enabling request ID and payload logging
 
     c) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below two entries to _throttle_out_handler_.xml , _auth_failure_handler_.xml and fault.xml
     
-	  <property name="message.type" scope="axis2" type="STRING" value="error"/>
+	      <property name="message.type" scope="axis2" type="STRING" value="error"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
 (Synapse Configurations files located at wso2telcohub/repository/deployment/server/synapse-configs/default/sequences)
