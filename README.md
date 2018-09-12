@@ -51,7 +51,7 @@ Follow below three steps for enabling request ID and payload logging
 		<property name="message.type" scope="axis2" type="STRING" value="response"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-    c) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below two entries to _throttle_out_handler_.xml and_auth_failure_handler_.xml
+    c) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below two entries to _throttle_out_handler_.xml , _auth_failure_handler_.xml and fault.xml
     
 	  <property name="message.type" scope="axis2" type="STRING" value="error"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
