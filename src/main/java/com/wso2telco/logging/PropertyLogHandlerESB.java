@@ -9,6 +9,11 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.json.JSONObject;
+import org.json.XML;
+
+
+
 
 public class PropertyLogHandlerESB extends AbstractMediator{
 
@@ -23,7 +28,8 @@ public class PropertyLogHandlerESB extends AbstractMediator{
     private static final String RESPONSE_TIME= "RESPONSE_TIME";
     private static final String OPERATOR_NAME = "OPERATOR_NAME";
     private static final String OPERATOR_ID = "OPERATOR_ID";
-    private static String OPERATION = null;
+    private static String FAULT = null;
+    private static String API_OPERATION = null;
 
     public boolean mediate(MessageContext messageContext) {
 
@@ -35,47 +41,91 @@ public class PropertyLogHandlerESB extends AbstractMediator{
 
     }
 
+    public String setOperation(String handler) {
+
+        switch (handler){
+            case "AmountChargeHandler":
+                handler ="Charge";
+                break;
+            case "AmountRefundHandler":
+                handler = "Refund";
+                break;
+            case  "RetrieveSMSHandler" : case "RetrieveSMSSouthboundHandler" : case "RetrieveSMSNorthboundHandler":
+                handler = "ReceiveSMS";
+                break;
+            case "SendSMSHandler" :
+                handler = "sendSMS";
+                break;
+            case "QuerySMSStatusHandler":
+                handler = "DeliveryInfo";
+                break;
+            case  "OutboundSMSSubscriptionsNorthboundHandler" : case "SMSOutboundNotificationsHandler" :
+                handler = "SubscribeToDeliveryNotifications";
+                break;
+            case  "SMSInboundSubscriptionsNorthboundHandler" : case "SMSInboundNotificationsHandler" :
+                handler = "SubscribetoMessageNotifcations";
+                break;
+            case "StopOutboundSMSSubscriptionsSouthBoundHandler":
+                handler = "SubscribeToDeliveryNotifications";
+                break;
+            case "StopInboundSMSSubscriptionsHandler":
+                handler = "StopSubscriptionToMessageNotifcations";
+                break;
+        }
+        return handler;
+
+    }
+
     private void logResponsePropertiesESB(MessageContext messageContext,
                                        org.apache.axis2.context.MessageContext axis2MessageContext, String direction) {
 
         String operation = (String) messageContext.getProperty("HANDLER");
+        String API_OPERATION = setOperation(operation);
+        String errorCode = (String) messageContext.getProperty("ERROR_CODE");
+        String jsonBody =null;
+        
+        if(errorCode != null){
+                String xmlString=axis2MessageContext.getEnvelope().toString();
+                JSONObject xmlJsonObj = XML.toJSONObject(xmlString);
+                jsonBody = xmlJsonObj.toString();
+                FAULT =jsonBody;
+        }
+        else{
+            jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
+            FAULT = "NULL";
+        }
 
-        if(operation.equals("AmountChargeHandler")){
-            OPERATION ="Charge";
-        }
-        else if (operation.equals("AmountRefundHandler")){
-            OPERATION = "Refund";
-        }
-        String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
         if (direction.equals("nb response")) {
-            logHandler.info("NORTHBOUND_RESPONSE_LOGGER-"+"API_REQUEST_ID:" + messageContext.getProperty(REQUESTID) +
-                    ",APPLICATION_ID:" + (String) messageContext.getProperty(APPLICATION_ID) +
-                    ",API_NAME:" + messageContext.getProperty(API_NAME) +
-                    ",API_VERSION:" + messageContext.getProperty(API_VERSION) +
-                    ",RESOURSE:" + messageContext.getProperty(RESOURCE) +
-                    ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME)+
-                    ",OPERATION:" + OPERATION +
-                    ",USER_ID:" + messageContext.getProperty(USER_ID) +
-                    ",DIRECTION:" + messageContext.getProperty(DIRECTION) +
-                    ",OPERATOR_NAME:" + messageContext.getProperty(OPERATOR_NAME) +
-                    ",OPERATOR_ID:" + messageContext.getProperty(OPERATOR_ID) +
-                    ",Body:" + jsonBody.replaceAll("\n", ""));
+            logHandler.info("NORTHBOUND_RESPONSE_LOGGER-"+"API_REQUEST_ID:wso2telco_value:" +  messageContext.getProperty(REQUESTID) +
+                    "-wso2telco_value,APPLICATION_ID:wso2telco_value:" + (String) messageContext.getProperty(APPLICATION_ID) +
+                    "-wso2telco_value,API_NAME:wso2telco_value:" + messageContext.getProperty(API_NAME) +
+                    "-wso2telco_value,API_VERSION:wso2telco_value:" + messageContext.getProperty(API_VERSION) +
+                    "-wso2telco_value,RESOURSE:wso2telco_value:" + messageContext.getProperty(RESOURCE) +
+                    "-wso2telco_value,RESPONSE_TIME:wso2telco_value:" + messageContext.getProperty(RESPONSE_TIME)+
+                    "-wso2telco_value,OPERATION:wso2telco_value:" + API_OPERATION +
+                    "-wso2telco_value,USER_ID:wso2telco_value:" + messageContext.getProperty(USER_ID) +
+                    "-wso2telco_value,DIRECTION:wso2telco_value:" + messageContext.getProperty(DIRECTION) +
+                    "-wso2telco_value,OPERATOR_NAME:wso2telco_value:" + messageContext.getProperty(OPERATOR_NAME) +
+                    "-wso2telco_value,OPERATOR_ID:wso2telco_value:" + messageContext.getProperty(OPERATOR_ID) +
+                    "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\n", "") +
+                    "-wso2telco_value,FAULT:wso2telco_value:" + FAULT.replaceAll("\n", ""));
         }
         else if(direction.equals("sb response")){
-            logHandler.info("SOUTHBOUND_RESPONSE_LOGGER-"+"API_REQUEST_ID:" + messageContext.getProperty(REQUESTID) +
-                    ",APPLICATION_ID:" + (String) messageContext.getProperty(APPLICATION_ID) +
-                    ",API_NAME:" + messageContext.getProperty(API_NAME) +
-                    ",API_VERSION:" + messageContext.getProperty(API_VERSION) +
-                    ",RESOURSE:" + messageContext.getProperty(RESOURCE) +
-                    ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME)+
-                    ",OPERATION:" + OPERATION +
-                    ",USER_ID:" + messageContext.getProperty(USER_ID) +
-                    ",DIRECTION:" + messageContext.getProperty(DIRECTION) +
-                    ",OPERATOR_NAME:" + messageContext.getProperty(OPERATOR_NAME) +
-                    ",OPERATOR_ID:" + messageContext.getProperty(OPERATOR_ID) +
-                    ",Body:" + jsonBody.replaceAll("\n", ""));
-        }
+            logHandler.info("SOUTHBOUND_RESPONSE_LOGGER-"+"API_REQUEST_ID:wso2telco_value:" + messageContext.getProperty(REQUESTID) +
+                    "-wso2telco_value,APPLICATION_ID:wso2telco_value:" + (String) messageContext.getProperty(APPLICATION_ID) +
+                    "-wso2telco_value,API_NAME:wso2telco_value:" + messageContext.getProperty(API_NAME) +
+                    "-wso2telco_value,API_VERSION:wso2telco_value:" + messageContext.getProperty(API_VERSION) +
+                    "-wso2telco_value,RESOURSE:wso2telco_value:" + messageContext.getProperty(RESOURCE) +
+                    "-wso2telco_value,RESPONSE_TIME:wso2telco_value:" + messageContext.getProperty(RESPONSE_TIME)+
+                    "-wso2telco_value,OPERATION:wso2telco_value:" + API_OPERATION +
+                    "-wso2telco_value,USER_ID:wso2telco_value:" + messageContext.getProperty(USER_ID) +
+                    "-wso2telco_value,DIRECTION:wso2telco_value:" + messageContext.getProperty(DIRECTION) +
+                    "-wso2telco_value,OPERATOR_NAME:wso2telco_value:" + messageContext.getProperty(OPERATOR_NAME) +
+                    "-wso2telco_value,OPERATOR_ID:wso2telco_value:" + messageContext.getProperty(OPERATOR_ID) +
+                    "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\n", "") +
+                    "-wso2telco_value,FAULT:wso2telco_value:" + FAULT.replaceAll("\n", ""));
 
+        }
     }
 
 }
