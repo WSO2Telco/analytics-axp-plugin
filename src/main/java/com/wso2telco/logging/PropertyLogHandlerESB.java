@@ -85,10 +85,15 @@ public class PropertyLogHandlerESB extends AbstractMediator{
         String jsonBody =null;
         
         if(errorCode != null){
-                String xmlString=axis2MessageContext.getEnvelope().toString();
+            try {
+                String xmlString = axis2MessageContext.getEnvelope().toString();
                 JSONObject xmlJsonObj = XML.toJSONObject(xmlString);
                 jsonBody = xmlJsonObj.toString();
-                FAULT =jsonBody;
+                FAULT = jsonBody;
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
         }
         else{
             jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
