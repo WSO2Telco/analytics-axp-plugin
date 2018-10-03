@@ -91,6 +91,11 @@
             <artifactId>neethi</artifactId>
             <version>2.0.4.wso2v5</version>
         </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20171018</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
