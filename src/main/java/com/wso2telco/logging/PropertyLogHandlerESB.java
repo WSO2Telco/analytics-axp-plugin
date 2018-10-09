@@ -12,9 +12,6 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.json.JSONObject;
 import org.json.XML;
 
-
-
-
 public class PropertyLogHandlerESB extends AbstractMediator{
 
     Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
@@ -89,7 +86,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                 String xmlString = axis2MessageContext.getEnvelope().toString();
                 JSONObject xmlJsonObj = XML.toJSONObject(xmlString);
                 jsonBody = xmlJsonObj.toString();
-                FAULT = jsonBody;
+                FAULT = "true";
             }
             catch (Exception e){
                 e.printStackTrace();
@@ -97,7 +94,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
         }
         else{
             jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
-            FAULT = "NULL";
+            FAULT = "false";
         }
 
         if (direction.equals("nb response")) {
@@ -113,7 +110,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                     "-wso2telco_value,OPERATOR_NAME:wso2telco_value:" + messageContext.getProperty(OPERATOR_NAME) +
                     "-wso2telco_value,OPERATOR_ID:wso2telco_value:" + messageContext.getProperty(OPERATOR_ID) +
                     "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\n", "") +
-                    "-wso2telco_value,FAULT:wso2telco_value:" + FAULT.replaceAll("\n", ""));
+                    "-wso2telco_value,ERROR:" + FAULT);
         }
         else if(direction.equals("sb response")){
             logHandler.info("SOUTHBOUND_RESPONSE_LOGGER-"+"API_REQUEST_ID:wso2telco_value:" + messageContext.getProperty(REQUESTID) +
@@ -128,7 +125,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                     "-wso2telco_value,OPERATOR_NAME:wso2telco_value:" + messageContext.getProperty(OPERATOR_NAME) +
                     "-wso2telco_value,OPERATOR_ID:wso2telco_value:" + messageContext.getProperty(OPERATOR_ID) +
                     "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\n", "") +
-                    "-wso2telco_value,FAULT:wso2telco_value:" + FAULT.replaceAll("\n", ""));
+                    "-wso2telco_value,ERROR:" + FAULT);
 
         }
     }
