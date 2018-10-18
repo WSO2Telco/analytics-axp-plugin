@@ -83,7 +83,7 @@ public class PropertyLogHandler extends AbstractMediator {
         TreeMap<String, String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         //String jwtToken = headers.get(JWT);
         if (isPayloadLoggingEnabled) {
-            String requestPayload = getPayloadSting(messageContext, axis2MessageContext);
+            String requestPayload = messageContext.getEnvelope().getBody().toString();
             logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
                     ",API_NAME:" + messageContext.getProperty(API_NAME) + "" +
                     ",SP_NAME:" + messageContext.getProperty(SP_NAME) + "" +
@@ -102,28 +102,13 @@ public class PropertyLogHandler extends AbstractMediator {
 
     private void logResponseProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         if (isPayloadLoggingEnabled) {
-            String responsePayload = getPayloadSting(messageContext, axis2MessageContext);
+            String responsePayload = messageContext.getEnvelope().getBody().toString();
             logHandler.info("TRANSACTION:response," +
                     "API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
                     ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME) + "" +
                     ",BODY:" + responsePayload.replaceAll("\n", ""));
         }
-    }
-
-    private String getPayloadSting(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
-        String payload;
-        if (axis2MessageContext.getProperty(CONTENT_TYPE).equals("application/json")) {
-            /**if content type is json */
-            payload = XML.toJSONObject(messageContext.getEnvelope().getBody().getFirstElement().getFirstElement().toString()).toString();
-        } else if (axis2MessageContext.getProperty(CONTENT_TYPE).equals("text/plain")) {
-            /**if content type is text/plain */
-            payload = messageContext.getEnvelope().getBody().getFirstElement().toString();
-        } else {
-            /** if content type is xml */
-            payload = messageContext.getEnvelope().getBody().toString();
-        }
-        return payload;
     }
 
     private void logErrorProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
@@ -170,5 +155,21 @@ public class PropertyLogHandler extends AbstractMediator {
             result = inputString.trim();
         }
         return result;
+    }
+
+    /** this method can be used if we need to get extract only json as body**/
+    private String getPayloadSting(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
+        String payload;
+        if (axis2MessageContext.getProperty(CONTENT_TYPE).equals("application/json")) {
+            /**if content type is json */
+            payload = XML.toJSONObject(messageContext.getEnvelope().getBody().getFirstElement().getFirstElement().toString()).toString();
+        } else if (axis2MessageContext.getProperty(CONTENT_TYPE).equals("text/plain")) {
+            /**if content type is text/plain */
+            payload = messageContext.getEnvelope().getBody().getFirstElement().toString();
+        } else {
+            /** if content type is xml */
+            payload = messageContext.getEnvelope().getBody().toString();
+        }
+        return payload;
     }
 }
