@@ -42,20 +42,33 @@ Follow below three steps for enabling request ID and payload logging
 
 3) Synapse changes for enabling Request ID and Payload Logging;
     a) If the request ID and the payload of a request needs to be logged for all APIs, then add the following two elements inside the sequence tag of WSO2AM-ExtIn.xml
+        
+    		<property name="message.type" scope="axis2" type="STRING" value="request"/>
+                    <class name="com.wso2telco.logging.PropertyLogHandler"/>
     
-		<property name="message.type" scope="axis2" type="STRING" value="request"/>
-        <class name="com.wso2telco.logging.PropertyLogHandler"/>
-
     b) If the request ID and the payload of the response from backend needs to be logged for All APIs, then add the following two elements inside the sequence tag of WSO2AMExt-Out.xml
-		
-		<property name="message.type" scope="axis2" type="STRING" value="response"/>
-        <class name="com.wso2telco.logging.PropertyLogHandler"/>
-
-    c) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below two entries to _throttle_out_handler_.xml , _auth_failure_handler_.xml and fault.xml
+        
+            <property name="message.type" scope="axis2" type="STRING" value="response"/>
+            <class name="com.wso2telco.logging.PropertyLogHandler"/>
     
-	      <property name="message.type" scope="axis2" type="STRING" value="error"/>
-        <class name="com.wso2telco.logging.PropertyLogHandler"/>
-
+    c) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below two entries to _auth_failure_handler_.xml
+        
+            <property name="HTTP_SC" value="401" scope="axis2"/>	        
+            <property name="message.type" scope="axis2" type="STRING" value="error"/>
+            <class name="com.wso2telco.logging.PropertyLogHandler"/>
+    
+    d) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below three entries to main.xml inside <in> block before the close of <send/> block
+        
+            <property name="ERROR_MESSAGE" value="Invalid Request URL"/>	        
+            <property name="message.type" scope="axis2" type="STRING" value="error"/>
+            <class name="com.wso2telco.logging.PropertyLogHandler"/>
+        
+   e) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below two entries to main.xml, _throttle_out_handler_.xml and_auth_failure_handler_.xml
+        
+    		<property name="HTTP_SC" value="429" scope="axis2"/>	        
+    		<property name="message.type" scope="axis2" type="STRING" value="error"/>
+            <class name="com.wso2telco.logging.PropertyLogHandler"/>
+    
 (Synapse Configurations files located at wso2telcohub/repository/deployment/server/synapse-configs/default/sequences)
 
 Enable Payload body from registry
