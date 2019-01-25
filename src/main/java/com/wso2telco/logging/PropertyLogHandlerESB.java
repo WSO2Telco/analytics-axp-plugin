@@ -17,6 +17,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
     Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
     private static final String DIRECTION = "DIRECTION";
     private static final String APPLICATION_ID = "APPLICATION_ID";
+    private static final String APPLICATION_NAME = "APPLICATION_NAME";
     private static final String REQUESTID = "REQUEST_ID";
     private static final String API_NAME = "API_NAME";
     private static final String API_VERSION ="VERSION";
@@ -100,6 +101,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
         if (direction.equals("nb response")) {
             logHandler.info("NORTHBOUND_RESPONSE_LOGGER-"+"API_REQUEST_ID:wso2telco_value:" +  messageContext.getProperty(REQUESTID) +
                     "-wso2telco_value,APPLICATION_ID:wso2telco_value:" + (String) messageContext.getProperty(APPLICATION_ID) +
+                    "-wso2telco_value,APPLICATION_NAME:wso2telco_value:" + (String) messageContext.getProperty(APPLICATION_NAME) +
                     "-wso2telco_value,API_NAME:wso2telco_value:" + messageContext.getProperty(API_NAME) +
                     "-wso2telco_value,API_VERSION:wso2telco_value:" + messageContext.getProperty(API_VERSION) +
                     "-wso2telco_value,RESOURSE:wso2telco_value:" + messageContext.getProperty(RESOURCE) +
@@ -109,12 +111,13 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                     "-wso2telco_value,DIRECTION:wso2telco_value:" + messageContext.getProperty(DIRECTION) +
                     "-wso2telco_value,OPERATOR_NAME:wso2telco_value:" + messageContext.getProperty(OPERATOR_NAME) +
                     "-wso2telco_value,OPERATOR_ID:wso2telco_value:" + messageContext.getProperty(OPERATOR_ID) +
-                    "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\n", "") +
+                    "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\\s", "") +
                     "-wso2telco_value,ERROR:" + FAULT);
         }
         else if(direction.equals("sb response")){
             logHandler.info("SOUTHBOUND_RESPONSE_LOGGER-"+"API_REQUEST_ID:wso2telco_value:" + messageContext.getProperty(REQUESTID) +
                     "-wso2telco_value,APPLICATION_ID:wso2telco_value:" + (String) messageContext.getProperty(APPLICATION_ID) +
+                    "-wso2telco_value,APPLICATION_NAME:wso2telco_value:" + (String) messageContext.getProperty(APPLICATION_NAME) +
                     "-wso2telco_value,API_NAME:wso2telco_value:" + messageContext.getProperty(API_NAME) +
                     "-wso2telco_value,API_VERSION:wso2telco_value:" + messageContext.getProperty(API_VERSION) +
                     "-wso2telco_value,RESOURSE:wso2telco_value:" + messageContext.getProperty(RESOURCE) +
@@ -124,7 +127,7 @@ public class PropertyLogHandlerESB extends AbstractMediator{
                     "-wso2telco_value,DIRECTION:wso2telco_value:" + messageContext.getProperty(DIRECTION) +
                     "-wso2telco_value,OPERATOR_NAME:wso2telco_value:" + messageContext.getProperty(OPERATOR_NAME) +
                     "-wso2telco_value,OPERATOR_ID:wso2telco_value:" + messageContext.getProperty(OPERATOR_ID) +
-                    "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\n", "") +
+                    "-wso2telco_value,Body:wso2telco_value:" + jsonBody.replaceAll("\\s", "") +
                     "-wso2telco_value,ERROR:" + FAULT);
 
         }
