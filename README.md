@@ -105,11 +105,13 @@ payment API
 -----------
 
 paymentMainSeq (add below under <sequence> line)
+
 	<property expression="get-property('SYSTEM_TIME')" name="REQUEST_TIMESTAMP" scope="default" type="STRING"/>
 	<property name="message.type" scope="axis2" type="STRING" value="request"/>
 	<class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
 paymentOutMainSeq
+
 	<property name="RESPONSE_TIMESTAMP" expression="get-property('SYSTEM_TIME')"/>
 	<class name="org.wso2telco.dep.nashornmediator.NashornMediator">
 			<property name="script" value="
@@ -126,12 +128,14 @@ location API
 ------------
 
 locationSequence (add below under <sequence> line)
+
     <property expression="get-property('SYSTEM_TIME')"
         name="REQUEST_TIMESTAMP" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
     <property name="message.type" scope="axis2" type="STRING" value="request"/>
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
 locationSequence (add below Just before <respond/>)
+
     <property expression="get-property('SYSTEM_TIME')"
         name="RESPONSE_TIMESTAMP" xmlns:ns="http://org.apache.synapse/xsd"/>
     <class name="org.wso2telco.dep.nashornmediator.NashornMediator">
@@ -145,12 +149,14 @@ smsmessaging API
 ----------------
 
 smsMainSeq (add below under <sequence> line)
+
     <property expression="get-property('SYSTEM_TIME')"
         name="REQUEST_TIMESTAMP" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
     <property name="message.type" scope="axis2" type="STRING" value="request"/>
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
 sendSmsSeq (add below just before <respond/>)
+
     <property expression="get-property('SYSTEM_TIME')"
         name="RESPONSE_TIMESTAMP" xmlns:ns="http://org.apache.synapse/xsd"/>
     <class name="org.wso2telco.dep.nashornmediator.NashornMediator">
@@ -164,12 +170,14 @@ ussd API
 ----------------
 
 ussdMainSeq (add below under <sequence> line)
+
     <property expression="get-property('SYSTEM_TIME')"
         name="REQUEST_TIMESTAMP" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
     <property name="message.type" scope="axis2" type="STRING" value="request"/>
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
 sendUssdSeq (add below just before <respond/>)
+
     <property expression="get-property('SYSTEM_TIME')"
         name="RESPONSE_TIMESTAMP" xmlns:ns="http://org.apache.synapse/xsd"/>
     <class name="org.wso2telco.dep.nashornmediator.NashornMediator">
@@ -183,5 +191,6 @@ Error logging
 -------------
 
 commonFault sequence (add below just before <send/>)
+
 	<property name="message.type" scope="axis2" type="STRING" value="error"/>
 	<class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
