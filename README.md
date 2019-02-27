@@ -166,6 +166,16 @@ sendSmsSeq (add below just before <respond/>)
     <property name="message.type" scope="axis2" type="STRING" value="response"/>
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
+Add the same of above to get the response log just before <respond/> in each of the below files
+smsRetrieveSeq
+smsQueryDeliveryStatusSeq
+subscribeToSMSDeliveryNotificationsSeq
+sendSMSDeliveryNotificationsSeq
+smsInboundSubscriptionSeq
+smsInboundNotificationHandlerSeq
+smsStopSubsDeliveryNotificationSeq
+smsStopSubsMessageNotificationSeq
+
 ussd API
 ----------------
 
@@ -176,7 +186,7 @@ ussdMainSeq (add below under <sequence> line)
     <property name="message.type" scope="axis2" type="STRING" value="request"/>
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
-sendUssdSeq (add below just before <respond/>)
+sendUssdSeq (add below just before <send>)
 
     <property expression="get-property('SYSTEM_TIME')"
         name="RESPONSE_TIMESTAMP" xmlns:ns="http://org.apache.synapse/xsd"/>
@@ -186,6 +196,11 @@ sendUssdSeq (add below just before <respond/>)
     </class>
     <property name="message.type" scope="axis2" type="STRING" value="response"/>
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
+
+Add the same of above to get the response log just before <respond/> in each of the below files
+ussdInboundSeq
+ussdMOSubscribeSeq
+ussdMOStopSubscriptionSeq
 
 Error logging
 -------------
