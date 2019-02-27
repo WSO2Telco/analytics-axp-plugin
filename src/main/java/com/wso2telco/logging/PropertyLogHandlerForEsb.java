@@ -77,7 +77,7 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
     private void logRequestProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         TreeMap<String, String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (isPayloadLoggingEnabled) {
-            String requestPayload = messageContext.getEnvelope().getBody().toString();
+            String requestPayload = handleAndReturnPayload(messageContext);
             logHandler.info("TRANSACTION:request" +
 					//",API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
 					",API_REQUEST_ID:" + headers.get(REQUEST_ID) + "" +
@@ -97,7 +97,7 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
 
     private void logResponseProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         if (isPayloadLoggingEnabled) {
-            String responsePayload = messageContext.getEnvelope().getBody().toString();
+            String responsePayload = handleAndReturnPayload(messageContext);
             logHandler.info("TRANSACTION:response" +
 					",API_REQUEST_ID:" + messageContext.getProperty(REQUEST_ID) + "" +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
@@ -154,6 +154,20 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
         }
         return result;
     }
+
+	/**
+	 * method used to handle invalid payloads
+	 */
+	private String handleAndReturnPayload(MessageContext messageContext) {
+		String payload = "";
+		try {
+			payload = messageContext.getEnvelope().getBody().toString();
+		} catch (Exception e) {
+			payload = "payload dropped due to invalid format";
+		} finally {
+			return payload;
+		}
+	}
 
     /** this method can be used if we need to get extract only json as body**/
     private String getPayloadSting(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
