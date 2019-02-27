@@ -83,7 +83,8 @@ public class PropertyLogHandler extends AbstractMediator {
         TreeMap<String, String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         //String jwtToken = headers.get(JWT);
         if (isPayloadLoggingEnabled) {
-            String requestPayload = messageContext.getEnvelope().getBody().toString();
+//            String requestPayload = messageContext.getEnvelope().getBody().toString();
+            String requestPayload = handleAndReturnPayload(messageContext);
             logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
                     ",API_NAME:" + messageContext.getProperty(API_NAME) + "" +
                     ",SP_NAME:" + messageContext.getProperty(SP_NAME) + "" +
@@ -102,7 +103,8 @@ public class PropertyLogHandler extends AbstractMediator {
 
     private void logResponseProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         if (isPayloadLoggingEnabled) {
-            String responsePayload = messageContext.getEnvelope().getBody().toString();
+//            String responsePayload = messageContext.getEnvelope().getBody().toString();
+            String responsePayload = handleAndReturnPayload(messageContext);
             logHandler.info("TRANSACTION:response," +
                     "API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
@@ -157,7 +159,23 @@ public class PropertyLogHandler extends AbstractMediator {
         return result;
     }
 
-    /** this method can be used if we need to get extract only json as body**/
+    /**
+     * method used to handle invalid payloads
+     */
+    private String handleAndReturnPayload(MessageContext messageContext) {
+        String payload = "";
+        try {
+            payload = messageContext.getEnvelope().getBody().toString();
+        } catch (Exception e) {
+            payload = "payload dropped due to invalid format";
+        } finally {
+            return payload;
+        }
+    }
+
+    /**
+     * this method can be used if we need to get extract only json as body
+     **/
     private String getPayloadSting(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
         String payload;
         if (axis2MessageContext.getProperty(CONTENT_TYPE).equals("application/json")) {
