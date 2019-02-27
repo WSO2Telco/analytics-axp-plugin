@@ -167,14 +167,8 @@ sendSmsSeq (add below just before <respond/>)
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
 Add the same of above to get the response log just before <respond/> in each of the below files
-smsRetrieveSeq
-smsQueryDeliveryStatusSeq
-subscribeToSMSDeliveryNotificationsSeq
-sendSMSDeliveryNotificationsSeq
-smsInboundSubscriptionSeq
-smsInboundNotificationHandlerSeq
-smsStopSubsDeliveryNotificationSeq
-smsStopSubsMessageNotificationSeq
+
+smsRetrieveSeq, smsQueryDeliveryStatusSeq, subscribeToSMSDeliveryNotificationsSeq, sendSMSDeliveryNotificationsSeq, smsInboundSubscriptionSeq, smsInboundNotificationHandlerSeq, smsStopSubsDeliveryNotificationSeq, smsStopSubsMessageNotificationSeq
 
 ussd API
 ----------------
@@ -198,9 +192,8 @@ sendUssdSeq (add below just before <send>)
     <class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
 
 Add the same of above to get the response log just before <respond/> in each of the below files
-ussdInboundSeq
-ussdMOSubscribeSeq
-ussdMOStopSubscriptionSeq
+
+ussdInboundSeq, ussdMOSubscribeSeq, ussdMOStopSubscriptionSeq
 
 Error logging
 -------------
