@@ -190,4 +190,5 @@ public class PropertyLogHandler extends AbstractMediator {
         }
         return payload;
     }
+
 }
