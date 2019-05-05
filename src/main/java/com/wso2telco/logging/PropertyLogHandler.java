@@ -16,7 +16,6 @@
 
 package com.wso2telco.logging;
 
-import java.util.TreeMap;
 import org.apache.axiom.om.impl.llom.OMTextImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +23,9 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.json.XML;
+
+import java.util.TreeMap;
 
 public class PropertyLogHandler extends AbstractMediator {
 
@@ -148,4 +150,5 @@ public class PropertyLogHandler extends AbstractMediator {
 		}
 		return result;
 	}
+
 }
