@@ -125,7 +125,7 @@ public class PropertyLogHandler extends AbstractMediator {
 	}
 	
 	private boolean extractPayloadLoggingStatus (MessageContext messageContext) {
-		boolean isPayloadLoggingEnabled = false;
+		boolean isPayloadLoggingEnabled = true;
 		
 		Entry payloadEntry = new Entry(REGISTRY_PATH + PAYLOAD_LOGGING_ENABLED);
 
