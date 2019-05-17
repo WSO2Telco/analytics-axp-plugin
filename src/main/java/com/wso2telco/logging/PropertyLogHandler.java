@@ -85,7 +85,7 @@ public class PropertyLogHandler extends AbstractMediator {
         if (isPayloadLoggingEnabled) {
 //            String requestPayload = messageContext.getEnvelope().getBody().toString();
             String requestPayload = handleAndReturnPayload(messageContext);
-            logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
+            logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + ((Axis2MessageContext) messageContext).getMessageID() + "" +
                     ",API_NAME:" + messageContext.getProperty(API_NAME) + "" +
                     ",SP_NAME:" + messageContext.getProperty(SP_NAME) + "" +
                     ",API_PUBLISHER:" + messageContext.getProperty(API_PUBLISHER) + "" +
@@ -106,7 +106,7 @@ public class PropertyLogHandler extends AbstractMediator {
 //            String responsePayload = messageContext.getEnvelope().getBody().toString();
             String responsePayload = handleAndReturnPayload(messageContext);
             logHandler.info("TRANSACTION:response," +
-                    "API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
+                    "API_REQUEST_ID:" + ((Axis2MessageContext) messageContext).getMessageID() + "" +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
                     ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME) + "" +
                     ",BODY:" + responsePayload.replaceAll("\n", ""));
@@ -114,10 +114,11 @@ public class PropertyLogHandler extends AbstractMediator {
     }
 
     private void logErrorProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
-        UniqueIDGenerator.generateAndSetUniqueID("EX", axis2MessageContext);
         if (isPayloadLoggingEnabled) {
+            //UniqueIDGenerator.generateAndSetUniqueID("EX", axis2MessageContext);
+
             logHandler.info("TRANSACTION:errorResponse," +
-                    ",API_REQUEST_ID:" + axis2MessageContext.getProperty(REQUEST_ID) +
+                    " API_REQUEST_ID:" + ((Axis2MessageContext) messageContext).getMessageID() + "" +
                     ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
                     ",REST_FULL_REQUEST_PATH:" + messageContext.getProperty(REST_FULL_REQUEST_PATH) +
                     ",SYNAPSE_REST_API:" + messageContext.getProperty(SYNAPSE_REST_API) +
@@ -126,8 +127,9 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",ERROR_EXCEPTION:" + messageContext.getProperty(ERROR_EXCEPTION) +
                     ",APPLICATION_NAME:" + messageContext.getProperty(APPLICATION_NAME) +
                     ",APPLICATION_ID:" + messageContext.getProperty(APPLICATION_ID) +
+                    ",SP_NAME:" + messageContext.getProperty(SP_NAME) + "" +
                     ",ERROR_CODE:" + messageContext.getProperty(ERROR_CODE) +
-                    ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
+                    ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) +
                     ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE));
         }
     }
