@@ -113,7 +113,7 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
             logHandler.info("TRANSACTION:errorResponse," +
 					//mife.prop.requestId set in UniqueIDGenerator
                     //",API_REQUEST_ID:" + axis2MessageContext.getProperty(REQUEST_ID) +
-                    ",API_REQUEST_ID:" + messageContext.getProperty(REQUEST_ID) +
+                    "API_REQUEST_ID:" + messageContext.getProperty(REQUEST_ID) +
                     ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
                     ",REST_FULL_REQUEST_PATH:" + headers.get(RESOURCE) +
                     ",SYNAPSE_REST_API:" + headers.get(API_NAME) +
