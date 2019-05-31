@@ -17,6 +17,7 @@
 package com.wso2telco.logging;
 
 import org.apache.axiom.om.impl.llom.OMTextImpl;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -54,12 +55,12 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
     private static final String HTTP_SC = "HTTP_SC";
     private static final String RESPONSE_TIME = "RESPONSE_TIME";
     private static final String CONTENT_TYPE = "messageType";
+    private static final String THROTTLED_OUT_REASON = "THROTTLED_OUT_REASON";
 
     private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
     public boolean mediate(MessageContext messageContext) {
         boolean isPayloadLoggingEnabled = false;
-
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         isPayloadLoggingEnabled = extractPayloadLoggingStatus(messageContext);
         String direction = (String) axis2MessageContext.getProperty(MESSAGE_TYPE);
@@ -78,31 +79,32 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
         TreeMap<String, String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (isPayloadLoggingEnabled) {
             String requestPayload = handleAndReturnPayload(messageContext);
-            logHandler.info("TRANSACTION:request" +
-					//",API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
-					",API_REQUEST_ID:" + headers.get(REQUEST_ID) + "" +
-                    ",API_NAME:" + headers.get(API_NAME) + "" +
-                    ",SP_NAME:" + headers.get(USER_ID) + "" +
-                    ",API_PUBLISHER:" + headers.get(API_PUBLISHER) + "" +
-                    ",API_VERSION:" + headers.get(API_VERSION) + "" +
-                    ",API_CONTEXT:" + headers.get(CONTEXT) + "" +
-                    ",APPLICATION_NAME:" + headers.get(APPLICATION_NAME) + "" +
-                    ",APPLICATION_ID:" + (String) headers.get(APPLICATION_ID) + "" +
-                    ",CONSUMER_KEY:" + headers.get(CONSUMER_KEY) + "" +
-                    ",API_RESOURCE_PATH:" + headers.get(RESOURCE) + "" +
-                    ",METHOD:" + headers.get(HTTP_METHOD) +
-                    ",BODY:" + requestPayload.replaceAll("\n", ""));
+            StringBuilder sb = new StringBuilder();
+            sb.append("TRANSACTION:request,API_REQUEST_ID:").append(headers.get(REQUEST_ID));
+            sb.append(",API_NAME:").append(headers.get(API_NAME));
+            sb.append(",SP_NAME:").append(headers.get(USER_ID));
+            sb.append( ",API_PUBLISHER:").append(headers.get(API_PUBLISHER));
+            sb.append(",API_VERSION:").append(headers.get(API_VERSION));
+            sb.append(",API_CONTEXT:").append(headers.get(CONTEXT));
+            sb.append(",APPLICATION_NAME:").append(headers.get(APPLICATION_NAME));
+            sb.append( ",APPLICATION_ID:").append((String) headers.get(APPLICATION_ID));
+            sb.append(",CONSUMER_KEY:").append(headers.get(CONSUMER_KEY));
+            sb.append(",API_RESOURCE_PATH:").append(headers.get(RESOURCE));
+            sb.append(",METHOD:").append(headers.get(HTTP_METHOD));
+            sb.append(",BODY:").append(requestPayload.replaceAll("\n", ""));
+            logHandler.info(sb);
         }
     }
 
     private void logResponseProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         if (isPayloadLoggingEnabled) {
             String responsePayload = handleAndReturnPayload(messageContext);
-            logHandler.info("TRANSACTION:response" +
-					",API_REQUEST_ID:" + messageContext.getProperty(REQUEST_ID) + "" +
-                    ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
-                    ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME) + "" +
-                    ",BODY:" + responsePayload.replaceAll("\n", ""));
+            StringBuilder sb = new StringBuilder();
+            sb.append("TRANSACTION:response,API_REQUEST_ID:").append(messageContext.getProperty(REQUEST_ID));
+            sb.append(",HTTP_STATUS:").append(axis2MessageContext.getProperty(HTTP_SC));
+            sb.append(",RESPONSE_TIME:").append(messageContext.getProperty(RESPONSE_TIME));
+            sb.append(",BODY:").append(responsePayload.replaceAll("\n", ""));
+            logHandler.info(sb);
         }
     }
 
@@ -110,21 +112,23 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
         //UniqueIDGenerator.generateAndSetUniqueID("EX", axis2MessageContext);
         TreeMap<String, String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (isPayloadLoggingEnabled) {
-            logHandler.info("TRANSACTION:errorResponse," +
-					//mife.prop.requestId set in UniqueIDGenerator
-                    //",API_REQUEST_ID:" + axis2MessageContext.getProperty(REQUEST_ID) +
-                    ",API_REQUEST_ID:" + messageContext.getProperty(REQUEST_ID) +
-                    ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
-                    ",REST_FULL_REQUEST_PATH:" + headers.get(RESOURCE) +
-                    ",SYNAPSE_REST_API:" + headers.get(API_NAME) +
-                    ",SYNAPSE_REST_API_VERSION:" + headers.get(API_VERSION) +
-                    ",API_RESOURCE_CACHE_KEY:" + messageContext.getProperty(API_RESOURCE_CACHE_KEY) + //Not available
-                    ",ERROR_EXCEPTION:" + messageContext.getProperty(ERROR_EXCEPTION) + //Not available
-                    ",APPLICATION_NAME:" + headers.get(APPLICATION_NAME) +
-                    ",APPLICATION_ID:" + (String) headers.get(APPLICATION_ID) +
-                    ",ERROR_CODE:" + messageContext.getProperty(ERROR_CODE) +
-                    ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
-                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERRVAR));
+            StringBuilder sb = new StringBuilder();
+         sb.append("TRANSACTION:errorResponse,API_REQUEST_ID:").append(messageContext.getProperty(REQUEST_ID));
+         sb.append(",REQUEST_BODY:").append(messageContext.getEnvelope().getBody().toString());
+         sb.append(",REST_FULL_REQUEST_PATH:").append(headers.get(RESOURCE));
+         sb.append(",SYNAPSE_REST_API:").append(headers.get(API_NAME));
+         sb.append(",SYNAPSE_REST_API_VERSION:").append(headers.get(API_VERSION));
+         sb.append(",API_RESOURCE_CACHE_KEY:").append(messageContext.getProperty(API_RESOURCE_CACHE_KEY) ); //Not available
+         sb.append(",ERROR_EXCEPTION:").append(messageContext.getProperty(ERROR_EXCEPTION));  //Not available
+         sb.append(",APPLICATION_NAME:").append(headers.get(APPLICATION_NAME));
+         sb.append(",APPLICATION_ID:").append((String) headers.get(APPLICATION_ID));
+         sb.append(",ERROR_CODE:").append(messageContext.getProperty(ERROR_CODE));
+         sb.append(",HTTP_STATUS:").append(axis2MessageContext.getProperty(HTTP_SC));
+         sb.append(",ERROR_MESSAGE:").append(messageContext.getProperty(ERRVAR));
+            if (messageContext.getProperty(ERROR_CODE).equals(900800)){
+                sb.append(",THROTTLED_OUT_REASON:").append(messageContext.getProperty(THROTTLED_OUT_REASON));
+            }
+         logHandler.info(sb);
         }
     }
 

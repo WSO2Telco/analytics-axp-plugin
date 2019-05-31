@@ -17,6 +17,7 @@
 package com.wso2telco.logging;
 
 import org.apache.axiom.om.impl.llom.OMTextImpl;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -58,6 +59,7 @@ public class PropertyLogHandler extends AbstractMediator {
     private static final String RESPONSE_TIME = "RESPONSE_TIME";
     private static final String CONTENT_TYPE = "messageType";
     private static final String CONSUMER_KEY = "api.ut.consumerKey";
+    private static final String THROTTLED_OUT_REASON = "THROTTLED_OUT_REASON";
 
     private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
@@ -85,19 +87,21 @@ public class PropertyLogHandler extends AbstractMediator {
         if (isPayloadLoggingEnabled) {
 //            String requestPayload = messageContext.getEnvelope().getBody().toString();
             String requestPayload = handleAndReturnPayload(messageContext);
-            logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
-                    ",API_NAME:" + messageContext.getProperty(API_NAME) + "" +
-                    ",SP_NAME:" + messageContext.getProperty(SP_NAME) + "" +
-                    ",API_PUBLISHER:" + messageContext.getProperty(API_PUBLISHER) + "" +
-                    ",API_VERSION:" + messageContext.getProperty(API_VERSION) +
-                    ",API_CONTEXT:" + messageContext.getProperty(API_CONTEXT) +
-                    ",APPLICATION_NAME:" + messageContext.getProperty(APPLICATION_NAME) +
-                    ",APPLICATION_ID:" + (String) messageContext.getProperty(APPLICATION_ID) + "" +
-                    ",CONSUMER_KEY:" + messageContext.getProperty(CONSUMER_KEY) +
-                    ",API_RESOURCE_PATH:" + messageContext.getProperty(REST_SUB_REQUEST_PATH) +
-                    ",METHOD:" + messageContext.getProperty(METHOD) +
-                    //",JWT_TOKEN:" + jwtToken + "" +      /*removed the JWT token from the log*/
-                    ",BODY:" + requestPayload.replaceAll("\n", ""));
+            StringBuilder sb = new StringBuilder();
+            sb.append("TRANSACTION:request,API_REQUEST_ID:").append(messageContext.getProperty("MESSAGE_ID"));
+            sb.append(",API_NAME:").append(messageContext.getProperty(API_NAME));
+            sb.append(",SP_NAME:").append(messageContext.getProperty(SP_NAME));
+            sb.append( ",API_PUBLISHER:").append(messageContext.getProperty(API_PUBLISHER));
+            sb.append(",API_VERSION:").append(messageContext.getProperty(API_VERSION));
+            sb.append(",API_CONTEXT:").append(messageContext.getProperty(API_CONTEXT));
+            sb.append(",APPLICATION_NAME:").append(messageContext.getProperty(APPLICATION_NAME));
+            sb.append( ",APPLICATION_ID:").append ((String) messageContext.getProperty(APPLICATION_ID));
+            sb.append(",CONSUMER_KEY:").append(messageContext.getProperty(CONSUMER_KEY));
+            sb.append(",API_RESOURCE_PATH:").append(messageContext.getProperty(REST_SUB_REQUEST_PATH));
+            sb.append(",METHOD:").append(messageContext.getProperty(METHOD));
+            sb.append(",BODY:").append(StringUtils.replace(requestPayload,"\n",""));
+            logHandler.info(sb);
+
         }
     }
 
@@ -105,30 +109,38 @@ public class PropertyLogHandler extends AbstractMediator {
         if (isPayloadLoggingEnabled) {
 //            String responsePayload = messageContext.getEnvelope().getBody().toString();
             String responsePayload = handleAndReturnPayload(messageContext);
-            logHandler.info("TRANSACTION:response," +
-                    "API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
-                    ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
-                    ",RESPONSE_TIME:" + messageContext.getProperty(RESPONSE_TIME) + "" +
-                    ",BODY:" + responsePayload.replaceAll("\n", ""));
+            StringBuilder sb = new StringBuilder();
+            sb.append("TRANSACTION:response,API_RESPONSE_ID:").append(messageContext.getProperty("MESSAGE_ID"));
+            sb.append(",HTTP_STATUS:").append(axis2MessageContext.getProperty(HTTP_SC));
+            sb.append(",RESPONSE_TIME:").append(messageContext.getProperty(RESPONSE_TIME));
+            sb.append(",BODY:").append(StringUtils.replace(responsePayload,"\n",""));
+            logHandler.info(sb);
         }
     }
 
     private void logErrorProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
-        UniqueIDGenerator.generateAndSetUniqueID("EX", axis2MessageContext);
         if (isPayloadLoggingEnabled) {
-            logHandler.info("TRANSACTION:errorResponse," +
-                    ",API_REQUEST_ID:" + axis2MessageContext.getProperty(REQUEST_ID) +
-                    ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
-                    ",REST_FULL_REQUEST_PATH:" + messageContext.getProperty(REST_FULL_REQUEST_PATH) +
-                    ",SYNAPSE_REST_API:" + messageContext.getProperty(SYNAPSE_REST_API) +
-                    ",SYNAPSE_REST_API_VERSION:" + messageContext.getProperty(API_VERSION) +
-                    ",API_RESOURCE_CACHE_KEY:" + messageContext.getProperty(API_RESOURCE_CACHE_KEY) +
-                    ",ERROR_EXCEPTION:" + messageContext.getProperty(ERROR_EXCEPTION) +
-                    ",APPLICATION_NAME:" + messageContext.getProperty(APPLICATION_NAME) +
-                    ",APPLICATION_ID:" + messageContext.getProperty(APPLICATION_ID) +
-                    ",ERROR_CODE:" + messageContext.getProperty(ERROR_CODE) +
-                    ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
-                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE));
+            //UniqueIDGenerator.generateAndSetUniqueID("EX", axis2MessageContext);
+            StringBuilder sb = new StringBuilder();
+            sb.append("TRANSACTION:errorResponse,API_REQUEST_ID:").append(((Axis2MessageContext) messageContext).getMessageID());
+            sb.append( ",REQUEST_BODY:").append(messageContext.getEnvelope().getBody().toString());
+            sb.append(",REST_FULL_REQUEST_PATH:").append(messageContext.getProperty(REST_FULL_REQUEST_PATH));
+            sb.append(",SYNAPSE_REST_API:").append(messageContext.getProperty(SYNAPSE_REST_API));
+            sb.append(",SYNAPSE_REST_API_VERSION:").append(messageContext.getProperty(API_VERSION));
+            sb.append(",API_RESOURCE_CACHE_KEY:").append(messageContext.getProperty(API_RESOURCE_CACHE_KEY));
+            sb.append(",ERROR_EXCEPTION:").append(messageContext.getProperty(ERROR_EXCEPTION));
+            sb.append(",APPLICATION_NAME:").append(messageContext.getProperty(APPLICATION_NAME));
+            sb.append(",APPLICATION_ID:").append(messageContext.getProperty(APPLICATION_ID));
+            sb.append(",SP_NAME:").append(messageContext.getProperty(SP_NAME));
+            sb.append(",ERROR_CODE:").append(messageContext.getProperty(ERROR_CODE));
+            sb.append(",HTTP_STATUS:").append(axis2MessageContext.getProperty(HTTP_SC));
+            sb.append(",ERROR_MESSAGE:").append(messageContext.getProperty(ERROR_MESSAGE));
+            if (messageContext.getProperty(ERROR_CODE).equals(900800)){
+                sb.append(",THROTTLED_OUT_REASON:").append(messageContext.getProperty(THROTTLED_OUT_REASON));
+            }
+            logHandler.info(sb);
+
+
         }
     }
 
