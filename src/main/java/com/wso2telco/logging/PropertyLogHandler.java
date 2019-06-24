@@ -134,7 +134,10 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",APPLICATION_ID:" + messageContext.getProperty(APPLICATION_ID) +
                     ",ERROR_CODE:" + messageContext.getProperty(ERROR_CODE) +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
-                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE));
+                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE) +
+                    ",BIZAO_TOKEN:"+messageContext.getProperty(BIZAO_TOKEN) +
+                    ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) 
+                );
         }
     }
 
