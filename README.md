@@ -58,13 +58,13 @@ Follow below three steps for enabling request ID and payload logging
 
 (Synapse Configurations files located at wso2telcohub/repository/deployment/server/synapse-configs/default/sequences)
 
-Enable Payload body from registry
-=================================
+Enable Payload body from registry in AM
+=======================================
 
-1) Log in to the G-Reg Management Console using the following URL and admin/admin credentials:https://<hostname>:9444/carbon/ and
+1) Log in to the G-Reg Management Console using the following URL and admin/admin credentials:https://<hostname>:9443/carbon/ and
 go to _system/governance/apimgt
 
-2) Click on "Add Resource" and select the "Create text contant" in Method
+2) Click on "Add Resource" and select the "Create text content" in Method
 
 3) Please insert Name: payload.logging.enabled and Content :true and save
 
@@ -202,3 +202,13 @@ commonFault sequence (add below just before <send/>)
 
 	<property name="message.type" scope="axis2" type="STRING" value="error"/>
 	<class name="com.wso2telco.logging.PropertyLogHandlerForEsb"/>
+
+
+Enable Payload body from registry in ESB
+========================================
+1) Log in to the G-Reg Management Console using the following URL and admin/admin credentials:https://<hostname>:9444/carbon/ and
+go to _system/governance/event
+
+2) Click on "Add Resource" and select the "Create text content" in Method
+
+3) Please insert Name: payload.logging.enabled and Content :true and save
