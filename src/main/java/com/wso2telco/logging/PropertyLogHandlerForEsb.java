@@ -100,7 +100,7 @@ public class PropertyLogHandlerForEsb extends AbstractMediator {
         if (isPayloadLoggingEnabled) {
             String responsePayload = handleAndReturnPayload(messageContext);
             StringBuilder sb = new StringBuilder();
-            sb.append("TRANSACTION:response,API_REQUEST_ID:"+ messageContext.getProperty(REQUEST_ID));
+            sb.append("TRANSACTION:response,API_RESPONSE_ID:"+ messageContext.getProperty(REQUEST_ID));
             sb.append(",HTTP_STATUS:"+ axis2MessageContext.getProperty(HTTP_SC));
             sb.append(",RESPONSE_TIME:"+ messageContext.getProperty(RESPONSE_TIME));
             sb.append(",BODY:"+ responsePayload.replaceAll("\n", ""));
