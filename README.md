@@ -41,17 +41,17 @@ Follow below three steps for enabling request ID and payload logging
 
 
 3) Synapse changes for enabling Request ID and Payload Logging;
-    a) If the request ID and the payload of a request needs to be logged for all APIs, then add the following two elements inside the sequence tag of WSO2AM-ExtIn.xml
+    a) If the request ID and the payload of a request needs to be logged for all APIs, then add the following two elements inside the sequence tag and below the  sequence key="com.apigate.bizao.sequence" tag of WSO2AM-ExtIn.xml
     
 		<property name="message.type" scope="axis2" type="STRING" value="request"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-    b) If the request ID and the payload of the response from backend needs to be logged for All APIs, then add the following two elements inside the sequence tag of WSO2AMExt-Out.xml
+    b) If the request ID and the payload of the response from backend needs to be logged for All APIs, then add the following two elements inside the sequence tag and below the sequence key="com.apigate.bizao.sequence" of WSO2AMExt-Out.xml
 		
 		<property name="message.type" scope="axis2" type="STRING" value="response"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-    c) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the below two entries to _throttle_out_handler_.xml , _auth_failure_handler_.xml and fault.xml
+    c) If the request ID and the payload of the error response from backend needs to be logged for all APIs, then add the following two entries below the  sequence key="com.apigate.bizao.sequence" of _throttle_out_handler_.xml , _auth_failure_handler_.xml and fault.xml
     
 	      <property name="message.type" scope="axis2" type="STRING" value="error"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
