@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
 package com.wso2telco.logging;
 
 import org.apache.axiom.om.impl.llom.OMTextImpl;
@@ -24,8 +23,6 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.json.XML;
-
-import java.util.TreeMap;
 
 public class PropertyLogHandler extends AbstractMediator {
 
@@ -40,11 +37,8 @@ public class PropertyLogHandler extends AbstractMediator {
     private static final String RESPONSE = "response";
     private static final String API_VERSION = "SYNAPSE_REST_API_VERSION";
     private static final String API_CONTEXT = "api.ut.context";
-    private static final String USER_ID = "api.ut.userId";
-    private static final String JWT = "X-JWT-Assertion";
     private static final String UUID = "MESSAGE_ID";
     private static final String ERROR = "error";
-    private static final String REQUEST_ID = "mife.prop.requestId";
     private static final String APPLICATION_NAME = "api.ut.application.name";
     private static final String REST_FULL_REQUEST_PATH = "REST_FULL_REQUEST_PATH";
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
@@ -82,10 +76,7 @@ public class PropertyLogHandler extends AbstractMediator {
     }
 
     private void logRequestProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
-        TreeMap<String, String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        //String jwtToken = headers.get(JWT);
         if (isPayloadLoggingEnabled) {
-//            String requestPayload = messageContext.getEnvelope().getBody().toString();
             String requestPayload = handleAndReturnPayload(messageContext);
             logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
                     ",API_NAME:" + messageContext.getProperty(API_NAME) + "" +
@@ -98,7 +89,6 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",CONSUMER_KEY:" + messageContext.getProperty(CONSUMER_KEY) +
                     ",API_RESOURCE_PATH:" + messageContext.getProperty(REST_SUB_REQUEST_PATH) +
                     ",METHOD:" + messageContext.getProperty(METHOD) +
-                    //",JWT_TOKEN:" + jwtToken + "" +      /*removed the JWT token from the log*/
                     ",BODY:" + requestPayload.replaceAll("\n", "") +
                     ",BIZAO_TOKEN:"+messageContext.getProperty(BIZAO_TOKEN) +
                     ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) 
@@ -108,7 +98,6 @@ public class PropertyLogHandler extends AbstractMediator {
 
     private void logResponseProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         if (isPayloadLoggingEnabled) {
-//            String responsePayload = messageContext.getEnvelope().getBody().toString();
             String responsePayload = handleAndReturnPayload(messageContext);
             logHandler.info("TRANSACTION:response," +
                     "API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
@@ -120,10 +109,9 @@ public class PropertyLogHandler extends AbstractMediator {
     }
 
     private void logErrorProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
-        UniqueIDGenerator.generateAndSetUniqueID("EX", axis2MessageContext);
         if (isPayloadLoggingEnabled) {
             logHandler.info("TRANSACTION:errorResponse," +
-                    ",API_REQUEST_ID:" + axis2MessageContext.getProperty(REQUEST_ID) +
+                    ",API_REQUEST_ID:" + messageContext.getProperty(UUID) +
                     ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
                     ",REST_FULL_REQUEST_PATH:" + messageContext.getProperty(REST_FULL_REQUEST_PATH) +
                     ",SYNAPSE_REST_API:" + messageContext.getProperty(SYNAPSE_REST_API) +
@@ -185,6 +173,7 @@ public class PropertyLogHandler extends AbstractMediator {
     /**
      * this method can be used if we need to get extract only json as body
      **/
+    @SuppressWarnings("unused")
     private String getPayloadSting(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
         String payload;
         if (axis2MessageContext.getProperty(CONTENT_TYPE).equals("application/json")) {
