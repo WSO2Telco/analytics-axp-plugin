@@ -110,7 +110,7 @@ public class PropertyLogHandler extends AbstractMediator {
 
     private void logErrorProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         if (isPayloadLoggingEnabled) {
-            logHandler.info("TRANSACTION:errorResponse," +
+            logHandler.info("TRANSACTION:errorResponse" +
                     ",API_REQUEST_ID:" + messageContext.getProperty(UUID) +
                     ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
                     ",REST_FULL_REQUEST_PATH:" + messageContext.getProperty(REST_FULL_REQUEST_PATH) +
