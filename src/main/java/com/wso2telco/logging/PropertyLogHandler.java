@@ -52,8 +52,6 @@ public class PropertyLogHandler extends AbstractMediator {
     private static final String RESPONSE_TIME = "RESPONSE_TIME";
     private static final String CONTENT_TYPE = "messageType";
     private static final String CONSUMER_KEY = "api.ut.consumerKey";
-    private static final String BIZAO_TOKEN = "bizao-token";
-    private static final String BIZAO_ALIAS = "bizao-alias";
 
     private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
@@ -89,9 +87,7 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",CONSUMER_KEY:" + messageContext.getProperty(CONSUMER_KEY) +
                     ",API_RESOURCE_PATH:" + messageContext.getProperty(REST_SUB_REQUEST_PATH) +
                     ",METHOD:" + messageContext.getProperty(METHOD) +
-                    ",BODY:" + requestPayload.replaceAll("\n", "") +
-                    ",BIZAO_TOKEN:"+messageContext.getProperty(BIZAO_TOKEN) +
-                    ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) 
+                    ",BODY:" + requestPayload.replaceAll("\n", "")
                 );
         }
     }
@@ -122,9 +118,7 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",APPLICATION_ID:" + messageContext.getProperty(APPLICATION_ID) +
                     ",ERROR_CODE:" + messageContext.getProperty(ERROR_CODE) +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
-                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE) +
-                    ",BIZAO_TOKEN:"+messageContext.getProperty(BIZAO_TOKEN) +
-                    ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) 
+                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE)
                 );
         }
     }
