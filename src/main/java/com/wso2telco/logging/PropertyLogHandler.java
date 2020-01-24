@@ -54,6 +54,7 @@ public class PropertyLogHandler extends AbstractMediator {
     private static final String CONSUMER_KEY = "api.ut.consumerKey";
     private static final String BIZAO_TOKEN = "bizao-token";
     private static final String BIZAO_ALIAS = "bizao-alias";
+    private static final String COUNTRY_CODE = "Country-code";
 
     private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
@@ -91,7 +92,8 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",METHOD:" + messageContext.getProperty(METHOD) +
                     ",BODY:" + requestPayload.replaceAll("\n", "") +
                     ",BIZAO_TOKEN:"+messageContext.getProperty(BIZAO_TOKEN) +
-                    ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) 
+                    ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) +
+                    ",COUNTRY_CODE:"+messageContext.getProperty(COUNTRY_CODE)
                 );
         }
     }
@@ -124,7 +126,8 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
                     ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE) +
                     ",BIZAO_TOKEN:"+messageContext.getProperty(BIZAO_TOKEN) +
-                    ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) 
+                    ",BIZAO_ALIAS:"+messageContext.getProperty(BIZAO_ALIAS) +
+                    ",COUNTRY_CODE:"+messageContext.getProperty(COUNTRY_CODE)
                 );
         }
     }
