@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
+import org.apache.axis2.context.*;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -35,6 +36,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 public class PropertyLogHandler extends AbstractMediator implements ManagedLifecycle {
     private static final String REGISTRY_PATH = "gov:/apimgt/";
@@ -51,6 +53,7 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
     private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
     private static final String MC = "MC";
     private static final String AX = "AX";
+    private static final String TH = "TH";
     private static final String FILE_NAME = "logManagerConfig.xml";
 
 
@@ -121,7 +124,8 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
 
         if (isPayloadLoggingEnabled) {
             String transactionPayload = handleAndReturnPayload(messageContext);
-            StringBuilder requestLog = new StringBuilder("TRANSACTION:" + typeFlag.toLowerCase());
+            Map<String, Object> headerMap = (Map<String, Object>)axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag.toLowerCase());
             HashMap<String, String> transactionMap;
             if (typeFlag.equalsIgnoreCase(REQUEST)) {
                 transactionMap = PropertyReader.getRequestpropertyMap();
@@ -139,14 +143,16 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
 
             for (String i : transactionMap.keySet()) {
                 if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(MC)) {
-                    requestLog.append("," + i + ":" + messageContext.getProperty(transactionMap.get(i).split(",")[0]));
+                    transactionLog.append("," + i + ":" + messageContext.getProperty(transactionMap.get(i).split(",")[0]));
                 } else if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(AX)) {
-                    requestLog.append("," + i + ":" + axis2MessageContext.getProperty(transactionMap.get(i)));
+                    transactionLog.append("," + i + ":" + axis2MessageContext.getProperty(transactionMap.get(i).split(",")[0]));
+                } else if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(TH)) {
+                        transactionLog.append("," + i + ":" +headerMap.get(transactionMap.get(i).split(",")[0]));
                 } else {
-                    requestLog.append("," + i + ":" + transactionPayload.replaceAll("\n", ""));
+                    transactionLog.append("," + i + ":" + transactionPayload.replaceAll("\n", ""));
                 }
             }
-            logHandler.info(requestLog);
+            logHandler.info(transactionLog);
         }
     }
 
