@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
-import org.apache.axis2.context.*;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -42,9 +41,9 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
     private static final String REGISTRY_PATH = "gov:/apimgt/";
     private static final String MESSAGE_TYPE = "message.type";
     private static final String PAYLOAD_LOGGING_ENABLED = "payload.logging.enabled";
-    private static final String REQUEST = "REQUEST";
-    private static final String RESPONSE = "RESPONSE";
-    private static final String ERRORRESPONSE = "ERRORRESPONSE";
+    private static final String REQUEST = "request";
+    private static final String RESPONSE = "response";
+    private static final String ERRORRESPONSE = "errorResponse";
     private static final String UUID = "MESSAGE_ID";
     private static final String ERROR = "error";
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
@@ -69,11 +68,11 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
             DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
             Document document = documentBuilder.parse(fXmlFile);
             document.getDocumentElement().normalize();
-            NodeList requestAttributes = document.getElementsByTagName(REQUEST);
+            NodeList requestAttributes = document.getElementsByTagName(REQUEST.toUpperCase());
             PropertyReader.setLogProperties(requestAttributes, REQUEST);
-            NodeList responseAttributes = document.getElementsByTagName(RESPONSE);
+            NodeList responseAttributes = document.getElementsByTagName(RESPONSE.toUpperCase());
             PropertyReader.setLogProperties(responseAttributes, RESPONSE);
-            NodeList errorAttributes = document.getElementsByTagName(ERRORRESPONSE);
+            NodeList errorAttributes = document.getElementsByTagName(ERRORRESPONSE.toUpperCase());
             PropertyReader.setLogProperties(errorAttributes, ERRORRESPONSE);
 
         }
@@ -105,7 +104,7 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
             } else if (direction.equalsIgnoreCase(RESPONSE)) {
                 logProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled, RESPONSE);
             } else if (direction.equalsIgnoreCase(ERROR)) {
-                logProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled, ERROR);
+                logProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled, ERRORRESPONSE);
             }
             return true;
         } else {
@@ -125,11 +124,11 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
         if (isPayloadLoggingEnabled) {
             String transactionPayload = handleAndReturnPayload(messageContext);
             Map<String, Object> headerMap = (Map<String, Object>)axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag.toLowerCase());
+            StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag);
             HashMap<String, String> transactionMap;
-            if (typeFlag.equalsIgnoreCase(REQUEST)) {
+            if (typeFlag.equals(REQUEST)) {
                 transactionMap = PropertyReader.getRequestpropertyMap();
-            } else if (typeFlag.equalsIgnoreCase(RESPONSE)) {
+            } else if (typeFlag.equals(RESPONSE)) {
                 transactionMap = PropertyReader.getResponsepropertyMap();
             } else {
                 transactionMap = PropertyReader.getErrorPropertiesMap();
