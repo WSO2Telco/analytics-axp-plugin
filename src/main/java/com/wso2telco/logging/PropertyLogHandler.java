@@ -25,6 +25,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.json.XML;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 public class PropertyLogHandler extends AbstractMediator {
@@ -58,6 +59,14 @@ public class PropertyLogHandler extends AbstractMediator {
     private static final String RESPONSE_TIME = "RESPONSE_TIME";
     private static final String CONTENT_TYPE = "messageType";
     private static final String CONSUMER_KEY = "api.ut.consumerKey";
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    private static final String X_IP = "x-ip";
+    private static final String CF_CONNECTING_IP = "CF-Connecting-IP";
+    private static final String TRUE_CLIENT_IP = "True-Client-IP";
+    private static final String X_REAL_IP = "X-Real-IP";
+    private static final String HOST = "Host";
+
+    
 
     private static final Log logHandler = LogFactory.getLog("REQUEST_RESPONSE_LOGGER");
 
@@ -82,7 +91,9 @@ public class PropertyLogHandler extends AbstractMediator {
     private void logRequestProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         TreeMap<String, String> headers = (TreeMap<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         //String jwtToken = headers.get(JWT);
-        if (isPayloadLoggingEnabled) {
+        
+        setHeaders(messageContext, axis2MessageContext);
+        if (true) {
             String requestPayload = messageContext.getEnvelope().getBody().toString();
             logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
                     ",API_NAME:" + messageContext.getProperty(API_NAME) + "" +
@@ -95,6 +106,12 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",CONSUMER_KEY:" + messageContext.getProperty(CONSUMER_KEY) +
                     ",API_RESOURCE_PATH:" + messageContext.getProperty(REST_SUB_REQUEST_PATH) +
                     ",METHOD:" + messageContext.getProperty(METHOD) +
+                    ",X_FORWARDED_FOR:" + messageContext.getProperty(X_FORWARDED_FOR) +
+                    ",X_IP:" + messageContext.getProperty(X_IP) +
+                    ",CF_CONNECTING_IP:" + messageContext.getProperty(CF_CONNECTING_IP) +
+                    ",TRUE_CLIENT_IP:" + messageContext.getProperty(TRUE_CLIENT_IP) +
+                    ",X_REAL_IP:" + messageContext.getProperty(X_REAL_IP) +
+
                     //",JWT_TOKEN:" + jwtToken + "" +      /*removed the JWT token from the log*/
                     ",BODY:" + requestPayload.replaceAll("\n", ""));
         }
@@ -155,6 +172,32 @@ public class PropertyLogHandler extends AbstractMediator {
             result = inputString.trim();
         }
         return result;
+    }
+    
+    private void setHeaders(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
+
+    	
+    	 Object headers = axis2MessageContext.getProperty(
+                 org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+    	 
+    	 String xForwardedFor = (String) messageContext.getProperty(X_FORWARDED_FOR);
+    	 String xIP = (String) messageContext.getProperty(X_IP);
+    	 String cfConnectionIP = (String) messageContext.getProperty(CF_CONNECTING_IP);
+    	 String trueClientIP = (String) messageContext.getProperty(TRUE_CLIENT_IP);
+    	 String xRealIP =  (String) messageContext.getProperty(X_REAL_IP);
+
+         if (headers != null && headers instanceof Map) {
+             Map headersMap = (Map) headers;
+             headersMap.put("SP-X_FORWARDED_FOR", xForwardedFor);
+             headersMap.put("SP-X_IP", xIP);
+             headersMap.put("SP-CF_CONNECTING_IP", cfConnectionIP);
+             headersMap.put("SP-TRUE_CLIENT_IP", trueClientIP);
+             headersMap.put("SP-X_REAL_IP", xRealIP);
+             axis2MessageContext.setProperty(
+                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS,
+                     headersMap);
+         }
+    	
     }
 
     /** this method can be used if we need to get extract only json as body**/
