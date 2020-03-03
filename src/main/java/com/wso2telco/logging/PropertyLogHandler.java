@@ -93,7 +93,7 @@ public class PropertyLogHandler extends AbstractMediator {
         //String jwtToken = headers.get(JWT);
         
         setHeaders(messageContext, axis2MessageContext);
-        if (true) {
+        if (isPayloadLoggingEnabled) {
             String requestPayload = messageContext.getEnvelope().getBody().toString();
             logHandler.info("TRANSACTION:request,API_REQUEST_ID:" + messageContext.getProperty(UUID) + "" +
                     ",API_NAME:" + messageContext.getProperty(API_NAME) + "" +
