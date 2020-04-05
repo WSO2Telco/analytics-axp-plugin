@@ -23,7 +23,7 @@
     <groupId>com.wso2telco</groupId>
     <artifactId>logging-extension</artifactId>
     <name>logging-extension</name>
-    <version>2.0.1-orange</version>
+    <version>2.0.2-orange</version>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
