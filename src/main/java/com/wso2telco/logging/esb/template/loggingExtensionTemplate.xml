@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template name="loggingExtensionTemplate" xmlns="http://ws.apache.org/ns/synapse">
+    <parameter name="direction"/>
+    <sequence>
+        <property expression="fn:normalize-space($func:direction)"
+                  name="direction" scope="default" type="STRING"
+                  xmlns:ns="http://org.apache.synapse/xsd" xmlns:ns2="http://org.apache.synapse/xsd"/>
+        <filter xmlns:ns="http://org.apache.synapse/xsd"
+                xmlns:ns2="http://org.apache.synapse/xsd" xpath="boolean($ctx:REQUEST_ID)">
+            <then>
+                <property expression="$ctx:REQUEST_ID"
+                          name="requestIdForLogging" scope="default" type="STRING"/>
+            </then>
+            <else>
+                <property expression="$trp:REQUEST_ID"
+                          name="requestIdForLogging" scope="default" type="STRING"/>
+            </else>
+        </filter>
+        <filter regex="REQUESTOUT" source="$ctx:direction"
+                xmlns:ns="http://org.apache.synapse/xsd" xmlns:ns2="http://org.apache.synapse/xsd">
+            <then>
+                <log level="custom">
+                    <property expression="$ctx:CONTEXT" name="API Request URL"/>
+                    <property expression="$ctx:API_NAME" name="API"/>
+                    <property expression="$ctx:OPERATOR" name="Operator Name"/>
+                    <property expression="$ctx:REQUEST_ID" name="Transaction Id"/>
+                </log>
+            </then>
+            <else/>
+        </filter>
+        <filter regex="RESPONSEOUT" source="$ctx:direction"
+                xmlns:ns="http://org.apache.synapse/xsd" xmlns:ns2="http://org.apache.synapse/xsd">
+            <then>
+                <log level="custom">
+                    <property expression="$axis2:HTTP_SC" name="API Response Status"/>
+                    <property expression="$ctx:API_NAME" name="API"/>
+                    <property name="Response Time(ms)" value="0"/>
+                    <property expression="$ctx:REQUEST_ID" name="Transaction Id"/>
+                </log>
+            </then>
+            <else/>
+        </filter>
+        <switch source="$ctx:direction"
+                xmlns:ns="http://org.apache.synapse/xsd" xmlns:ns2="http://org.apache.synapse/xsd">
+            <case regex="REQUESTIN">
+                <property
+                        expression="fn:concat('[',get-property('SYSTEM_DATE','yyyy-MM-dd HH:mm:ss'),'] >>>>> API Request id ', $ctx:requestIdForLogging)"
+                        name="requestDetails" scope="default" type="STRING"/>
+                <property name="message.type" scope="axis2"
+                          type="STRING" value="requestin"/>
+                <class name="com.wso2telco.logging.esb.PropertyLogHandlerESB"/>
+                <log level="custom">
+                    <property expression="$ctx:direction" name="Direction"/>
+                    <property
+                            expression="get-property('requestIdForLogging')" name="REQUEST ID"/>
+                    <property expression="json-eval($.)" name="###REQUEST_INFO -> reqBody In:"/>
+                </log>
+            </case>
+            <case regex="REQUESTOUT">
+                <property
+                        expression="fn:concat('[',get-property('SYSTEM_DATE','yyyy-MM-dd HH:mm:ss'),'] >>>>> API Request id ', $ctx:requestIdForLogging)"
+                        name="requestDetails" scope="default" type="STRING"/>
+                <property name="message.type" scope="axis2"
+                          type="STRING" value="requestout"/>
+                <class name="com.wso2telco.logging.esb.PropertyLogHandlerESB"/>
+                <log level="custom">
+                    <property expression="$ctx:direction" name="Direction"/>
+                    <property
+                            expression="get-property('requestIdForLogging')" name="REQUEST ID"/>
+                    <property expression="json-eval($.)" name="###REQUEST_INFO -> reqBody Out:"/>
+                </log>
+            </case>
+            <case regex="RESPONSEIN">
+                <property
+                        expression="fn:concat('[',get-property('SYSTEM_DATE','yyyy-MM-dd HH:mm:ss'),'] &lt;&lt;&lt;&lt;&lt; API Request id ', $ctx:requestIdForLogging)"
+                        name="requestDetails" scope="default" type="STRING"/>
+                <property name="message.type" scope="axis2"
+                          type="STRING" value="responsein"/>
+                <class name="com.wso2telco.logging.esb.PropertyLogHandlerESB"/>
+                <log level="custom">
+                    <property expression="$ctx:direction" name="Direction"/>
+                    <property
+                            expression="get-property('requestIdForLogging')" name="REQUEST ID"/>
+                    <property expression="json-eval($.)" name="###RESPONSE_INFO### &lt;&lt;&lt;&lt;&lt; respBody In:"/>
+                </log>
+            </case>
+            <case regex="RESPONSEOUT">
+                <property
+                        expression="fn:concat('[',get-property('SYSTEM_DATE','yyyy-MM-dd HH:mm:ss'),'] &lt;&lt;&lt;&lt;&lt; API Request id ', $ctx:requestIdForLogging)"
+                        name="requestDetails" scope="default" type="STRING"/>
+                <property name="message.type" scope="axis2"
+                          type="STRING" value="responseout"/>
+                <class name="com.wso2telco.logging.esb.PropertyLogHandlerESB"/>
+                <log level="custom">
+                    <property expression="$ctx:direction" name="Direction"/>
+                    <property
+                            expression="get-property('requestIdForLogging')" name="REQUEST ID"/>
+                    <property expression="json-eval($.)" name="###RESPONSE_INFO -> respBody Out:"/>
+                </log>
+            </case>
+            <default>
+                <log category="ERROR" level="custom">
+                    <property
+                            expression="fn:concat('Invalid Direction for request/response details logging. Direction: ', $ctx:direction)" name="Log Extension Sequence"/>
+                </log>
+            </default>
+        </switch>
+    </sequence>
+</template>
