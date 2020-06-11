@@ -9,7 +9,7 @@ Enable Request ID and Payload Logging
 
 Follow below three steps for enabling request ID and payload logging
 
-1) Apply logging-extension-1.0.0-SNAPSHOT.jar to API Manager;
+1) Apply logging-extension-2.0.2.jar to API Manager;
 		a) Copy and paste the 'logging-extension-2.0.2.jar' in to deployed api manager lib directory. (Patch source is available under "/wso2telcohub/repository/components/lib".)
 		b) Apply the logManagerConfig.xml (config/logManagerConfig.xml) file (located in conf folder to Gateway node <APIM>repository/conf)
 		
