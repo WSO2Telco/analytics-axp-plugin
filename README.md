@@ -67,3 +67,30 @@ go to _system/governance/apimgt
 3) Please insert Name: payload.logging.enabled and Content :true and save
 
 
+Enable Request,Response logging in ESB,EI
+=========================================
+(com.wso2telco.mediator.log.handler.SynapseLogHandler)
+
+
+com.wso2telco.mediator.log.handler is handler which can used to log API transaction details in ESB/EI.
+
+Please follow the steps below to configure the given jar in your environment.
+
+1) build the repository and go to target folder
+2) Copy Jar into <ESB_HOME>/repository/components/lib
+3) Add the following configurations to <ESB_HOME>/repository/conf/synapse-handlers.xml file
+```
+<handlers>
+     <handler name = "SynapseLogHandler" class="com.wso2telco.mediator.log.handler.SynapseLogHandler"/>
+</handlers>
+
+```
+4) Add the following configurations to <ESB_HOME>/repository/conf/log4j.properties
+```
+log4j.logger.com.wso2telco.mediator.log.handler.SynapseLogHandler=DEBUG
+```
+5) Start the server and create an API.
+6) When you invoke the API, you will be able to see the logs successfully.
+
+
+
