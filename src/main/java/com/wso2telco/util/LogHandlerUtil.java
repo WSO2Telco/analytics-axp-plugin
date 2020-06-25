@@ -1,29 +1,17 @@
-package com.wso2telco.mediator.log.handler;
+package com.wso2telco.util;
 
+import static com.wso2telco.util.CommonConstant.*;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.logging.Log;
 import org.apache.log4j.MDC;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.mediators.MediatorLog;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
-
 import java.util.Map;
 import java.util.UUID;
 
 public class LogHandlerUtil {
-
-    public static final String TRACKING_ID = "RequestId";
-    //Key value to hold "to" address of the service.
-    public static final String TRACKING_TO = "To";
-    // Key value to hold API name with version
-    public static final String TRACKING_API = "api.ut.api_version";
-     // Key value to hold HTTP method
-    public static final String TRACKING_HTTP_METHOD = "api.ut.HTTP_METHOD";
-    // Key value to hold "to" address of the service.
-    public static final String TRACKING_MESSAGE_ID = "MessageID";
 
     /*
      * Sets the required parameters on log4j thread local to enable expected
@@ -68,7 +56,6 @@ public class LogHandlerUtil {
      * @param context synapse context.
      * @return tracking id string.
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
     public static String generateTrackingId(MessageContext context) {
         String trackingId;
         //Check the tracking id in the message context
@@ -86,7 +73,6 @@ public class LogHandlerUtil {
      * @param context synapse message context.
      * @return reference to HTTP header map reference.
      */
-    @SuppressWarnings("rawtypes")
     public static Map getHTTPHeaders(MessageContext context) {
 
         org.apache.axis2.context.MessageContext axis2MessageCtx =
@@ -108,25 +94,15 @@ public class LogHandlerUtil {
     }
 
     /*
-     * Get a SynapseLog instance appropriate for the given context.
-     *
-     * @param synCtx the current message context
-     * @return MediatorLog instance - an implementation of the SynapseLog
-     */
-    public static SynapseLog getLog(MessageContext synCtx, Log log) {
-        return new MediatorLog(log, false, synCtx);
-    }
-
-    /*
      * Returns the HTTP status code with appended description.
      *
-     * @param synCtx the current message context
+     * @param messageContext the current message context
      * @return HTTP status description.
      */
-    public static String getHTTPStatusMessage(MessageContext synCtx) {
+    public static String getHTTPStatusMessage(MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axis2MessageCtx =
-                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         StringBuilder msg = new StringBuilder();
 
@@ -153,51 +129,43 @@ public class LogHandlerUtil {
     /*
      * Returns the HTTP method associated with the context.
      *
-     * @param synCtx the current message context
+     * @param messageContext the current message context
      * @return HTTP method name.
      */
-    public static String getHTTPMethod(MessageContext synCtx) {
-
+    public static String getHTTPMethod(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MessageCtx =
-                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-
-        return (String) axis2MessageCtx.getProperty("HTTP_METHOD");
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        return (String) axis2MessageCtx.getProperty(HTTP_METHOD);
     }
 
     /*
      * Returns the HTTP method associated with the context.
      *
-     * @param synCtx the current message context
+     * @param messageContext the current message context
      * @return HTTP method name.
      */
-    public static String getToHTTPAddress(MessageContext synCtx) {
-
+    public static String getToHTTPAddress(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MessageCtx =
-                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         EndpointReference to = axis2MessageCtx.getTo();
-
         if (to != null)
             return to.getAddress();
-
         return "";
     }
 
     /*
      * Returns the HTTP method associated with the context.
      *
-     * @param synCtx the current message context
+     * @param messageContext the current message context
      * @return HTTP method name.
      */
-    public static String getReplyToHTTPAddress(MessageContext synCtx) {
-
-        org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-
+    public static String getReplyToHTTPAddress(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         EndpointReference replyTo = axis2MessageCtx.getReplyTo();
-
         if (replyTo != null)
             return replyTo.getAddress();
-
         return "";
     }
+
+
 }

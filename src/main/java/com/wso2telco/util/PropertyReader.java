@@ -1,22 +1,26 @@
-package com.wso2telco.logging;
+package com.wso2telco.util;
 
-import org.w3c.dom.*;
 
-import java.util.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class PropertyReader {
 
-    private static final String REQUEST = "REQUEST";
-    private static final String RESPONSE = "RESPONSE";
-    private static HashMap<String, String> requestpropertyMap = new LinkedHashMap();//
-    private static HashMap<String, String> responsepropertyMap = new LinkedHashMap();//
-    private static HashMap<String, String> errorpropertyMap = new LinkedHashMap();//
+    private static HashMap<String, String> requestpropertyMap = new LinkedHashMap();
+    private static HashMap<String, String> responsepropertyMap = new LinkedHashMap();
+    private static HashMap<String, String> errorpropertyMap = new LinkedHashMap();
 
     public static HashMap<String, String> getRequestpropertyMap() {
         return requestpropertyMap;
     }
 
-    public static HashMap<String, String> getResponsepropertyMap() { return responsepropertyMap; }
+    public static HashMap<String, String> getResponsepropertyMap() {
+        return responsepropertyMap;
+    }
 
     public static HashMap<String, String> getErrorPropertiesMap() {
         return errorpropertyMap;
@@ -24,8 +28,9 @@ public class PropertyReader {
 
     /**
      * Set the transaction properties
+     *
      * @param requestNodeList the request attribute list
-     * @param flag transaction type
+     * @param flag            transaction type
      */
     public static void setLogProperties(NodeList requestNodeList, String flag) {
         Node requestNode = requestNodeList.item(0);
@@ -34,11 +39,11 @@ public class PropertyReader {
             String requestEl = requestElement.getTextContent().trim();
             String requestArray[] = requestEl.split("\n");
 
-            if (flag.equalsIgnoreCase(REQUEST)) {
+            if (flag.equalsIgnoreCase(CommonConstant.REQUEST)) {
                 for (int x = 0; x < requestArray.length; x++) {
                     requestpropertyMap.put(requestElement.getElementsByTagName("*").item((x)).getNodeName(), requestArray[x].trim());
                 }
-            } else if (flag.equalsIgnoreCase(RESPONSE)) {
+            } else if (flag.equalsIgnoreCase(CommonConstant.RESPONSE)) {
                 for (int y = 0; y < requestArray.length; y++) {
                     responsepropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
                 }
