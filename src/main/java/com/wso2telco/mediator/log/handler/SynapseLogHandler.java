@@ -1,10 +1,6 @@
 package com.wso2telco.mediator.log.handler;
 
-import static com.wso2telco.util.CommonConstant.*;
-
 import com.wso2telco.util.LogHandlerUtil;
-import org.apache.axis2.Constants;
-import org.apache.commons.io.IOUtils;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
@@ -12,9 +8,9 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.io.StringWriter;
+import static com.wso2telco.util.CommonConstant.*;
 
 public class SynapseLogHandler extends AbstractSynapseHandler {
 
@@ -84,11 +80,12 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         String payload = "";
         try {
             RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
-            InputStream jsonPaylodStream = (InputStream) ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext().getProperty("org.apache.synapse.commons.json.JsonInputStream");
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(jsonPaylodStream, writer);
-            payload = writer.toString();
+            if (JsonUtil.hasAJsonPayload(((Axis2MessageContext) messageContext).getAxis2MessageContext())) {
+                JSONObject jsonPayload = new JSONObject(JsonUtil.jsonPayloadToString(((Axis2MessageContext) messageContext).getAxis2MessageContext()));
+                payload = jsonPayload.toString();
+            } else {
+                payload = messageContext.getEnvelope().toString();
+            }
         } catch (Exception e) {
             payload = "payload dropped due to invalid format";
         } finally {
@@ -105,7 +102,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             if (JsonUtil.hasAJsonPayload(((Axis2MessageContext) messageContext).getAxis2MessageContext())) {
                 payload = JsonUtil.jsonPayloadToString(((Axis2MessageContext) messageContext).getAxis2MessageContext());
             } else {
-                payload =  messageContext.getEnvelope().toString();
+                payload = messageContext.getEnvelope().toString();
             }
         } catch (Exception e) {
             payload = "payload dropped due to invalid format";
@@ -127,67 +124,63 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         String requestPayload = null;
         String requestId = null;
 
-        if(flowDirection.equalsIgnoreCase("request_in")) {
+        if (flowDirection.equalsIgnoreCase("request_in")) {
             messageContext.setProperty(INFLOW_REQUEST_START_TIME, System.currentTimeMillis());
             requestPayload = handleInPayload(messageContext);
             requestId = LogHandlerUtil.generateTrackingId(messageContext);
         }
 
-        if(flowDirection.equalsIgnoreCase("request_out")) {
+        if (flowDirection.equalsIgnoreCase("request_out")) {
             messageContext.setProperty(OUTFLOW_REQUEST_START_TIME, System.currentTimeMillis());
             requestPayload = handleOutPayload(messageContext);
             requestId = messageContext.getProperty(TRACKING_MESSAGE_ID).toString();
         }
 
-        if(flowDirection.equalsIgnoreCase("response_in")) {
+        if (flowDirection.equalsIgnoreCase("response_in")) {
             messageContext.setProperty(INFLOW_RESPONSE_END_TIME, System.currentTimeMillis());
             requestPayload = handleInPayload(messageContext);
             requestId = messageContext.getProperty(TRACKING_MESSAGE_ID).toString();
         }
 
-        if(flowDirection.equalsIgnoreCase("response_out")) {
+        if (flowDirection.equalsIgnoreCase("response_out")) {
             requestPayload = handleOutPayload(messageContext);
-            long responseTime, serviceTime = 0, backendTime = 0, backendEndTime = 0;
+            long serviceTime, esbTime = 0, backendTime = 0, backendEndTime = 0;
             long endTime = System.currentTimeMillis();
             long startTime = 0, backendStartTime = 0;
-                if (messageContext.getProperty(INFLOW_REQUEST_START_TIME) != null) {
-                    startTime = (Long) messageContext.getProperty(INFLOW_REQUEST_START_TIME);
-                }
-                if (messageContext.getProperty(OUTFLOW_REQUEST_START_TIME) != null) {
-                    backendStartTime = (Long) messageContext.getProperty(OUTFLOW_REQUEST_START_TIME);
-                }
-                if (messageContext.getProperty(INFLOW_RESPONSE_END_TIME) != null) {
-                    backendEndTime = (Long)messageContext.getProperty(INFLOW_RESPONSE_END_TIME);
-                }
+            if (messageContext.getProperty(INFLOW_REQUEST_START_TIME) != null) {
+                startTime = (Long) messageContext.getProperty(INFLOW_REQUEST_START_TIME);
+            }
+            if (messageContext.getProperty(OUTFLOW_REQUEST_START_TIME) != null) {
+                backendStartTime = (Long) messageContext.getProperty(OUTFLOW_REQUEST_START_TIME);
+            }
+            if (messageContext.getProperty(INFLOW_RESPONSE_END_TIME) != null) {
+                backendEndTime = (Long) messageContext.getProperty(INFLOW_RESPONSE_END_TIME);
+            }
 
-                responseTime = endTime - startTime;
-                //When start time not properly set
-                if (startTime == 0) {
-                    backendTime = 0;
-                    serviceTime = 0;
-                } else if (endTime != 0 && backendStartTime != 0 && backendEndTime != 0) { //When
-                    // response caching is disabled
-                    backendTime = backendEndTime - backendStartTime;
-                    serviceTime = responseTime - backendTime;
-                } else if (endTime != 0 && backendStartTime == 0) {//When response caching enabled
-                    backendTime = 0;
-                    serviceTime = responseTime;
-                }
-            MEDIATOR_LOGGER.info( "\n"+"TRANSACTION:"+ flowDirection + ",API_REQUEST_ID:" + messageContext.getProperty(TRACKING_MESSAGE_ID) + "" +
-                    ",API_NAME:" + API_NAME + "" +
-                    ",API_CONTEXT:" + CONTEXT +
-                    ",API_RESOURCE_PATH:" + FULL_REQUEST_PATH +
-                    ",METHOD:" + HTTP_METHOD +
-                    ", HTTP_RESPONSE_STATUS_CODE: " + HTTP_RESPONSE_STATUS_CODE + ", RESPONSE_TIME: " + responseTime +
-                    ", BACKEND_TIME: " + backendTime + ", SERVICE_TIME: " + serviceTime +
+            serviceTime = endTime - startTime;
+            //When start time not properly set
+            if (startTime == 0) {
+                backendTime = 0;
+                esbTime = 0;
+            } else if (endTime != 0 && backendStartTime != 0 && backendEndTime != 0) { //When
+                // response caching is disabled
+                backendTime = backendEndTime - backendStartTime;
+                esbTime = serviceTime - backendTime;
+            } else if (endTime != 0 && backendStartTime == 0) {//When response caching enabled
+                backendTime = 0;
+                esbTime = serviceTime;
+            }
+            MEDIATOR_LOGGER.info("TRANSACTION:" + flowDirection + ",API_REQUEST_ID:" + messageContext.getProperty(TRACKING_MESSAGE_ID) + "" +
+                    ", HTTP_STATUS: " + HTTP_RESPONSE_STATUS_CODE + ", SERVICE_TIME: " + serviceTime +
+                    ", BACKEND_TIME: " + backendTime + ", ESB_TIME: " + esbTime +
                     ",BODY:" + requestPayload);
         } else {
-            MEDIATOR_LOGGER.info("TRANSACTION:" + flowDirection + ",API_REQUEST_ID:" +  requestId + "" +
+            MEDIATOR_LOGGER.info("TRANSACTION:" + flowDirection + ",API_REQUEST_ID:" + requestId + "" +
                     ",API_NAME:" + API_NAME + "" +
                     ",API_CONTEXT:" + CONTEXT +
                     ",API_RESOURCE_PATH:" + FULL_REQUEST_PATH +
                     ",METHOD:" + HTTP_METHOD +
-                    ",BODY:" + requestPayload + "\n");
+                    ",BODY:" + requestPayload);
         }
     }
 

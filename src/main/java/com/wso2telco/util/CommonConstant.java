@@ -37,6 +37,6 @@ public final class CommonConstant {
     // Key value to hold HTTP method
     public static final String TRACKING_HTTP_METHOD = "api.ut.HTTP_METHOD";
     // Key value to hold "to" address of the service.
-    public static final String TRACKING_MESSAGE_ID = "MessageID";
+    public static final String TRACKING_MESSAGE_ID = "REQUEST_ID";
     public static final String HTTP_METHOD = "HTTP_METHOD";
 }

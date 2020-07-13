@@ -1,6 +1,5 @@
 package com.wso2telco.util;
 
-import static com.wso2telco.util.CommonConstant.*;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.log4j.MDC;
@@ -8,10 +7,15 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+
 import java.util.Map;
 import java.util.UUID;
 
+import static com.wso2telco.util.CommonConstant.*;
+
 public class LogHandlerUtil {
+    public static org.apache.axis2.context.MessageContext axis2MessageContext;
+    public static Map<String, Object> headerMap;
 
     /*
      * Sets the required parameters on log4j thread local to enable expected
@@ -34,17 +38,17 @@ public class LogHandlerUtil {
             MDC.put(TRACKING_ID, context.getMessageID());
 
         try {
-                //Check the tracking id in the message context
-                String trackingId = generateTrackingId(context);
-                //Put the header value on log4j thread local
-                MDC.put(TRACKING_ID, trackingId);
-            } catch (Exception e) {
-                //Do nothing here
-                if (log != null) {
-                    log.auditWarn("Unable to set the logging context due to " + e);
-                }
+            //Check the tracking id in the message context
+            String trackingId = generateTrackingId(context);
+            //Put the header value on log4j thread local
+            MDC.put(TRACKING_ID, trackingId);
+        } catch (Exception e) {
+            //Do nothing here
+            if (log != null) {
+                log.auditWarn("Unable to set the logging context due to " + e);
             }
-       // }
+        }
+        // }
     }
 
     /*
@@ -58,11 +62,21 @@ public class LogHandlerUtil {
      */
     public static String generateTrackingId(MessageContext context) {
         String trackingId;
+        axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
+        headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         //Check the tracking id in the message context
-        String trackingMessageId = (String) context.getMessageID();
+        String trackingMessageId = null;
+        try {
+            trackingMessageId = headerMap.get(TRACKING_MESSAGE_ID).toString();
+        } catch (Exception e) {
+            MEDIATOR_LOGGER.error("Error while getting values from Transport Headers" + e.toString());
+        }
         if (trackingMessageId == null) {
-           trackingId = UUID.randomUUID().toString();
-           context.setProperty(TRACKING_MESSAGE_ID, trackingId);
+            trackingMessageId = (String) context.getMessageID();
+            if (trackingMessageId == null) {
+                trackingMessageId = UUID.randomUUID().toString();
+                context.setProperty(TRACKING_MESSAGE_ID, trackingMessageId);
+            }
         } else context.setProperty(TRACKING_MESSAGE_ID, trackingMessageId);
         return trackingMessageId;
     }
@@ -82,7 +96,7 @@ public class LogHandlerUtil {
                 org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
     }
 
-      //Clears the thread local values.
+    //Clears the thread local values.
 
     public static void clearLogContext() {
 
