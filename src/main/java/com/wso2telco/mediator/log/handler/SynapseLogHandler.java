@@ -37,13 +37,13 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             Document document = documentBuilder.parse(fXmlFile);
             document.getDocumentElement().normalize();
             NodeList requestinAttributes = document.getElementsByTagName(REQUEST_IN.toUpperCase());
-            PropertyReader.setLogPropertiesEsb(requestinAttributes, REQUEST_IN);
+            PropertyReader.setLogProperties(requestinAttributes, REQUEST_IN);
             NodeList requestoutAttributes = document.getElementsByTagName(REQUEST_OUT.toUpperCase());
-            PropertyReader.setLogPropertiesEsb(requestoutAttributes, REQUEST_OUT);
+            PropertyReader.setLogProperties(requestoutAttributes, REQUEST_OUT);
             NodeList responseinAttributes = document.getElementsByTagName(RESPONSE_IN.toUpperCase());
-            PropertyReader.setLogPropertiesEsb(responseinAttributes, RESPONSE_IN);
+            PropertyReader.setLogProperties(responseinAttributes, RESPONSE_IN);
             NodeList responseoutAttributes = document.getElementsByTagName(RESPONSE_OUT.toUpperCase());
-            PropertyReader.setLogPropertiesEsb(responseoutAttributes, RESPONSE_OUT);
+            PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException er) {
@@ -149,7 +149,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             if (JsonUtil.hasAJsonPayload(((Axis2MessageContext) messageContext).getAxis2MessageContext())) {
                 JSONObject jsonPayload = new JSONObject(JsonUtil.jsonPayloadToString(((Axis2MessageContext) messageContext).getAxis2MessageContext()));
                 payload = jsonPayload.toString();
-            }else {
+            } else {
                 payload = messageContext.getEnvelope().toString();
             }
         } catch (Exception e) {
@@ -194,19 +194,22 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         }
 
 
-        for (String i : transactionMap.keySet()) {
-            if (i.equalsIgnoreCase("AM_MAPPING_ID")) {
-                LogHandlerUtil.generateTrackingIdEsb(messageContext, transactionMap.get(i).split(",")[0], transactionMap.get(i).split(",")[1]);
-            }
-            else{
-                if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(MC)) {
-                    transactionLog.append("," + i + ":" + messageContext.getProperty(transactionMap.get(i).split(",")[0]));
-                } else if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(AX)) {
-                    transactionLog.append("," + i + ":" + axis2MessageContext.getProperty(transactionMap.get(i).split(",")[0]));
-                } else if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(TH)) {
-                    transactionLog.append("," + i + ":" + headerMap.get(transactionMap.get(i).split(",")[0]));
+        for (String KeyVariable : transactionMap.keySet()) {
+
+            String key = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[0];
+            String value = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[1];
+
+            if (KeyVariable.equalsIgnoreCase("AM_MAPPING_ID")) {
+                LogHandlerUtil.generateTrackingId(messageContext, key, value);
+            } else {
+                if (value.equalsIgnoreCase(MC)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + messageContext.getProperty(key));
+                } else if (value.equalsIgnoreCase(AX)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + axis2MessageContext.getProperty(key));
+                } else if (value.equalsIgnoreCase(TH)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + headerMap.get(key));
                 } else {
-                    transactionLog.append("," + i + ":" + transactionPayload);
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + transactionPayload);
                 }
             }
 

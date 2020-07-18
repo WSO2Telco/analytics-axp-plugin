@@ -63,7 +63,7 @@ public class LogHandlerUtil {
      * @param context synapse context.
      * @return tracking id string.
      */
-    public static void generateTrackingIdEsb(MessageContext messageContext, String amMapping, String esbMapping) throws IOException, XMLStreamException {
+    public static void generateTrackingId(MessageContext messageContext, String amMapping, String esbMapping) throws IOException, XMLStreamException {
         String trackingId;
         RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
         axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
