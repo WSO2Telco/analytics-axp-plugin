@@ -10,6 +10,10 @@ public final class CommonConstant {
     public static final String PAYLOAD_LOGGING_ENABLED = "payload.logging.enabled";
     public static final String REQUEST = "request";
     public static final String RESPONSE = "response";
+    public static final String REQUEST_IN = "request_in";
+    public static final String REQUEST_OUT = "request_out";
+    public static final String RESPONSE_IN = "response_in";
+    public static final String RESPONSE_OUT = "response_out";
     public static final String ERROR_RESPONSE = "errorResponse";
     public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final String ERROR = "error";
@@ -21,8 +25,11 @@ public final class CommonConstant {
     public static final String AX = "AX";
     public static final String TH = "TH";
     public static final String FILE_NAME = "logManagerConfig.xml";
+    public static final String ESB_FILE_NAME = "esbLogManagerConfig.xml";
     public static final String APPLICATION_JSON = "application/json";
     public static final String TEXT_PLAIN = "text/plain";
+    public static final char LOGMESSAGEDELIMITER = ',';
+    public static final char LOGDATADELIMITER = ':';
 
     /* Properties use in SynapsLogHandler */
     public static final String INFLOW_REQUEST_START_TIME = "IFRST";

@@ -1,18 +1,61 @@
 package com.wso2telco.mediator.log.handler;
 
 import com.wso2telco.util.LogHandlerUtil;
+import com.wso2telco.util.PropertyReader;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.wso2telco.util.CommonConstant.*;
 
 public class SynapseLogHandler extends AbstractSynapseHandler {
+
+
+    public void init(SynapseEnvironment synapseEnvironment) {
+        try {
+            String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + ESB_FILE_NAME;
+            File fXmlFile = new File(configPath);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
+            Document document = documentBuilder.parse(fXmlFile);
+            document.getDocumentElement().normalize();
+            NodeList requestinAttributes = document.getElementsByTagName(REQUEST_IN.toUpperCase());
+            PropertyReader.setLogProperties(requestinAttributes, REQUEST_IN);
+            NodeList requestoutAttributes = document.getElementsByTagName(REQUEST_OUT.toUpperCase());
+            PropertyReader.setLogProperties(requestoutAttributes, REQUEST_OUT);
+            NodeList responseinAttributes = document.getElementsByTagName(RESPONSE_IN.toUpperCase());
+            PropertyReader.setLogProperties(responseinAttributes, RESPONSE_IN);
+            NodeList responseoutAttributes = document.getElementsByTagName(RESPONSE_OUT.toUpperCase());
+            PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException er) {
+            er.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void destroy() {
+        throw new UnsupportedOperationException();
+    }
 
     /*
      * Incoming request to the service or API. This is the first entry point,
@@ -22,7 +65,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      */
     public boolean handleRequestInFlow(MessageContext messageContext) {
         try {
-            logMessage(messageContext, "request_in");
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            logProperties(messageContext, axis2MessageContext, REQUEST_IN);
         } catch (Exception e) {
             MEDIATOR_LOGGER.error("Error while reading message context : " + e.getMessage());
         }
@@ -36,7 +80,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      */
     public boolean handleRequestOutFlow(MessageContext messageContext) {
         try {
-            logMessage(messageContext, "request_out");
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            logProperties(messageContext, axis2MessageContext, REQUEST_OUT);
         } catch (Exception e) {
             MEDIATOR_LOGGER.error("Unable to set log context due to : " + e.getMessage());
         }
@@ -50,7 +95,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      */
     public boolean handleResponseInFlow(MessageContext messageContext) {
         try {
-            logMessage(messageContext, "response_in");
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            logProperties(messageContext, axis2MessageContext, RESPONSE_IN);
         } catch (Exception e) {
             MEDIATOR_LOGGER.error("Unable to set log context due to : " + e.getMessage());
         }
@@ -64,7 +110,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      */
     public boolean handleResponseOutFlow(MessageContext messageContext) {
         try {
-            logMessage(messageContext, "response_out");
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            logProperties(messageContext, axis2MessageContext, RESPONSE_OUT);
         } catch (Exception e) {
             MEDIATOR_LOGGER.error("Unable to set log context due to : " + e.getMessage());
         } finally {
@@ -100,7 +147,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         String payload = "";
         try {
             if (JsonUtil.hasAJsonPayload(((Axis2MessageContext) messageContext).getAxis2MessageContext())) {
-                payload = JsonUtil.jsonPayloadToString(((Axis2MessageContext) messageContext).getAxis2MessageContext());
+                JSONObject jsonPayload = new JSONObject(JsonUtil.jsonPayloadToString(((Axis2MessageContext) messageContext).getAxis2MessageContext()));
+                payload = jsonPayload.toString();
             } else {
                 payload = messageContext.getEnvelope().toString();
             }
@@ -111,77 +159,63 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         }
     }
 
+    private void logProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, String typeFlag) throws IOException, XMLStreamException {
 
-    private void logMessage(MessageContext messageContext, String flowDirection) {
-        String API_NAME = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-        String HTTP_METHOD = LogHandlerUtil.getHTTPMethod(messageContext);// messageContext.getProperty(Constants.Configuration.HTTP_METHOD);
-        String CONTEXT = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String FULL_REQUEST_PATH = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-        String HTTP_RESPONSE_STATUS_CODE = LogHandlerUtil.getHTTPStatusMessage(messageContext);
-        String SUB_PATH = (String) messageContext.getProperty(RESTConstants.REST_SUB_REQUEST_PATH);
-        String ERROR_CODE = String.valueOf(messageContext.getProperty(SynapseConstants.ERROR_CODE));
-        String ERROR_MESSAGE = (String) messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
-        String requestPayload = null;
+
+        String transactionPayload = "";
+        Map<String, Object> headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag);
+        HashMap<String, String> transactionMap = null;
         String requestId = null;
 
-        if (flowDirection.equalsIgnoreCase("request_in")) {
-            messageContext.setProperty(INFLOW_REQUEST_START_TIME, System.currentTimeMillis());
-            requestPayload = handleInPayload(messageContext);
-            requestId = LogHandlerUtil.generateTrackingId(messageContext);
+        switch (typeFlag) {
+            case (REQUEST_IN):
+                transactionMap = PropertyReader.getRequestinpropertyMap();
+                transactionPayload = handleInPayload(messageContext);
+                break;
+            case (REQUEST_OUT):
+                transactionMap = PropertyReader.getRequestoutpropertyMap();
+                transactionPayload = handleOutPayload(messageContext);
+                break;
+            case (RESPONSE_IN):
+                transactionMap = PropertyReader.getResponseinpropertyMap();
+                transactionPayload = handleInPayload(messageContext);
+                break;
+            case (RESPONSE_OUT):
+                transactionMap = PropertyReader.getResponseoutpropertyMap();
+                transactionPayload = handleOutPayload(messageContext);
+                break;
+
         }
 
-        if (flowDirection.equalsIgnoreCase("request_out")) {
-            messageContext.setProperty(OUTFLOW_REQUEST_START_TIME, System.currentTimeMillis());
-            requestPayload = handleOutPayload(messageContext);
-            requestId = messageContext.getProperty(TRACKING_MESSAGE_ID).toString();
+        /**Check the request map and recall the init method */
+        if (transactionMap == null || transactionMap.isEmpty()) {
+            init(null);
         }
 
-        if (flowDirection.equalsIgnoreCase("response_in")) {
-            messageContext.setProperty(INFLOW_RESPONSE_END_TIME, System.currentTimeMillis());
-            requestPayload = handleInPayload(messageContext);
-            requestId = messageContext.getProperty(TRACKING_MESSAGE_ID).toString();
-        }
 
-        if (flowDirection.equalsIgnoreCase("response_out")) {
-            requestPayload = handleOutPayload(messageContext);
-            long serviceTime, esbTime = 0, backendTime = 0, backendEndTime = 0;
-            long endTime = System.currentTimeMillis();
-            long startTime = 0, backendStartTime = 0;
-            if (messageContext.getProperty(INFLOW_REQUEST_START_TIME) != null) {
-                startTime = (Long) messageContext.getProperty(INFLOW_REQUEST_START_TIME);
-            }
-            if (messageContext.getProperty(OUTFLOW_REQUEST_START_TIME) != null) {
-                backendStartTime = (Long) messageContext.getProperty(OUTFLOW_REQUEST_START_TIME);
-            }
-            if (messageContext.getProperty(INFLOW_RESPONSE_END_TIME) != null) {
-                backendEndTime = (Long) messageContext.getProperty(INFLOW_RESPONSE_END_TIME);
+        for (String KeyVariable : transactionMap.keySet()) {
+
+            String key = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[0];
+            String value = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[1];
+
+            if (KeyVariable.equalsIgnoreCase("AM_MAPPING_ID")) {
+                LogHandlerUtil.generateTrackingId(messageContext, key, value);
+            } else {
+                if (value.equalsIgnoreCase(MC)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + messageContext.getProperty(key));
+                } else if (value.equalsIgnoreCase(AX)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + axis2MessageContext.getProperty(key));
+                } else if (value.equalsIgnoreCase(TH)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + headerMap.get(key));
+                } else {
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + transactionPayload);
+                }
             }
 
-            serviceTime = endTime - startTime;
-            //When start time not properly set
-            if (startTime == 0) {
-                backendTime = 0;
-                esbTime = 0;
-            } else if (endTime != 0 && backendStartTime != 0 && backendEndTime != 0) { //When
-                // response caching is disabled
-                backendTime = backendEndTime - backendStartTime;
-                esbTime = serviceTime - backendTime;
-            } else if (endTime != 0 && backendStartTime == 0) {//When response caching enabled
-                backendTime = 0;
-                esbTime = serviceTime;
-            }
-            MEDIATOR_LOGGER.info("TRANSACTION:" + flowDirection + ",API_REQUEST_ID:" + messageContext.getProperty(TRACKING_MESSAGE_ID) + "" +
-                    ", HTTP_STATUS: " + HTTP_RESPONSE_STATUS_CODE + ", SERVICE_TIME: " + serviceTime +
-                    ", BACKEND_TIME: " + backendTime + ", ESB_TIME: " + esbTime +
-                    ",BODY:" + requestPayload);
-        } else {
-            MEDIATOR_LOGGER.info("TRANSACTION:" + flowDirection + ",API_REQUEST_ID:" + requestId + "" +
-                    ",API_NAME:" + API_NAME + "" +
-                    ",API_CONTEXT:" + CONTEXT +
-                    ",API_RESOURCE_PATH:" + FULL_REQUEST_PATH +
-                    ",METHOD:" + HTTP_METHOD +
-                    ",BODY:" + requestPayload);
         }
+        MEDIATOR_LOGGER.info(transactionLog);
+
     }
 
 }

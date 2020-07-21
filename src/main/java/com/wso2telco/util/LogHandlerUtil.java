@@ -7,7 +7,10 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -60,6 +63,30 @@ public class LogHandlerUtil {
      * @param context synapse context.
      * @return tracking id string.
      */
+    public static void generateTrackingId(MessageContext messageContext, String amMapping, String esbMapping) throws IOException, XMLStreamException {
+        String trackingId;
+        RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
+        axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        //Check the tracking id in the message context
+        String trackingMessageId = null;
+        try {
+            trackingMessageId = headerMap.get(amMapping).toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (trackingMessageId == null) {
+                trackingMessageId = (String) messageContext.getMessageID();
+                if (trackingMessageId == null) {
+                    trackingMessageId = UUID.randomUUID().toString();
+                    messageContext.setProperty(esbMapping, trackingMessageId);
+                }
+                messageContext.setProperty(esbMapping, trackingMessageId);
+            } else messageContext.setProperty(esbMapping, trackingMessageId);
+        }
+
+    }
+
     public static String generateTrackingId(MessageContext context) {
         String trackingId;
         axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
