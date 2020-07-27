@@ -166,7 +166,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         String transactionPayload = "";
         Map<String, Object> headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag+ LOGMESSAGEDELIMITER+"TIMESTAMP"+LOGDATADELIMITER+timestamp.getTime());
+        StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag + LOGMESSAGEDELIMITER + "TIMESTAMP" + LOGDATADELIMITER + timestamp.getTime());
         HashMap<String, String> transactionMap = null;
         String requestId = null;
 
