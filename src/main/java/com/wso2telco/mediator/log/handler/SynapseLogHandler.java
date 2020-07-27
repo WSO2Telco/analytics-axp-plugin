@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -164,7 +165,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
 
         String transactionPayload = "";
         Map<String, Object> headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag);
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag+ LOGMESSAGEDELIMITER+"TIMESTAMP"+LOGDATADELIMITER+timestamp.getTime());
         HashMap<String, String> transactionMap = null;
         String requestId = null;
 
@@ -199,7 +201,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             String key = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[0];
             String value = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[1];
 
-            if (KeyVariable.equalsIgnoreCase("AM_MAPPING_ID")) {
+            if (AM_MAPPING_ID.equalsIgnoreCase(KeyVariable)) {
                 LogHandlerUtil.generateTrackingId(messageContext, key, value);
             } else {
                 if (value.equalsIgnoreCase(MC)) {

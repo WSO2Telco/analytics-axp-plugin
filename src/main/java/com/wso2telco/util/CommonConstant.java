@@ -29,7 +29,9 @@ public final class CommonConstant {
     public static final String APPLICATION_JSON = "application/json";
     public static final String TEXT_PLAIN = "text/plain";
     public static final char LOGMESSAGEDELIMITER = ',';
-    public static final char LOGDATADELIMITER = ':';
+    public static final char LOGDATADELIMITER=':';
+    public static final String AM_MAPPING_ID = "AM_MAPPING_ID";
+
 
     /* Properties use in SynapsLogHandler */
     public static final String INFLOW_REQUEST_START_TIME = "IFRST";
