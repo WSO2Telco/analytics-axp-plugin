@@ -195,13 +195,12 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             init(null);
         }
 
-
         for (String KeyVariable : transactionMap.keySet()) {
 
             String key = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[0];
             String value = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[1];
 
-            if (AM_MAPPING_ID.equalsIgnoreCase(KeyVariable)) {
+            if (null == messageContext.getProperty(MESSAGE_ID) && AM_MAPPING_ID.equalsIgnoreCase(KeyVariable)) {
                 LogHandlerUtil.generateTrackingId(messageContext, key, value);
             } else {
                 if (value.equalsIgnoreCase(MC)) {
@@ -211,7 +210,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
                 } else if (value.equalsIgnoreCase(TH)) {
                     transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + headerMap.get(key));
                 } else {
-                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + transactionPayload);
+                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + transactionPayload + LOGDATADELIMITER + KeyVariable);
                 }
             }
 
