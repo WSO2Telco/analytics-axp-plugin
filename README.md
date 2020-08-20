@@ -13,7 +13,7 @@ Mediator log Handler will log Request-In, Request-Out, Response-In, Response-Out
 Follow below three steps for enabling request ID and payload logging
 
 1. Apply logging-extension-2.1.0 jar to AM/ESB;
-		a) Copy and paste the 'logging-extension-2.1.0.jar' in to deployed api manager/esb lib directory. (Patch source is available under "{AM/ESB Home}/repository/components/lib".)
+		a) Copy and paste the 'logging-extension-2.1.0.jar' in to deployed APIM/ESB lib directory. (Patch source is available under "{AM/ESB Home}/repository/components/lib".)
 		b) Copy the logExtensionConfigAM.xml/logExtensionConfigESB.xml according to your deployment and paste the file in conf folder located  in <APIM/ESB>/repository/conf and rename the file to logExtensionConfig.xml
 		
 2. Enable Log4J properties for the newly installed feature
