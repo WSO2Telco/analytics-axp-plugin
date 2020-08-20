@@ -96,7 +96,7 @@ public class LogHandlerUtil {
         try {
             trackingMessageId = headerMap.get(TRACKING_MESSAGE_ID).toString();
         } catch (Exception e) {
-            MEDIATOR_LOGGER.error("Error while getting values from Transport Headers" + e.toString());
+            e.printStackTrace();
         }
         if (trackingMessageId == null) {
             trackingMessageId = (String) context.getMessageID();

@@ -24,20 +24,13 @@ public final class CommonConstant {
     public static final String MC = "MC";
     public static final String AX = "AX";
     public static final String TH = "TH";
-    public static final String FILE_NAME = "logManagerConfig.xml";
-    public static final String ESB_FILE_NAME = "esbLogManagerConfig.xml";
     public static final String APPLICATION_JSON = "application/json";
     public static final String TEXT_PLAIN = "text/plain";
-    public static final char LOGMESSAGEDELIMITER = ',';
-    public static final char LOGDATADELIMITER = ':';
-    public static final String AM_MAPPING_ID = "AM_MAPPING_ID";
+
 
 
     /* Properties use in SynapsLogHandler */
-    public static final String INFLOW_REQUEST_START_TIME = "IFRST";
-    public static final String OUTFLOW_REQUEST_START_TIME = "ORST";
-    public static final String INFLOW_RESPONSE_END_TIME = "IFRET";
-    public static final Log MEDIATOR_LOGGER = LogFactory.getLog("MEDIATOR_LOGGER");
+    public static final Log AXP_ANALYTICS_LOGGER = LogFactory.getLog("AXP_ANALYTICS_LOGGER");
     public static final String TRACKING_ID = "RequestId";
     //Key value to hold "to" address of the service.
     public static final String TRACKING_TO = "To";

@@ -25,13 +25,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.wso2telco.util.CommonConstant.*;
+import static com.wso2telco.util.Constants.*;
 
 public class SynapseLogHandler extends AbstractSynapseHandler {
 
-
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
-            String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + ESB_FILE_NAME;
+            String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + FILE_NAME;
             File fXmlFile = new File(configPath);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
@@ -69,7 +69,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             logProperties(messageContext, axis2MessageContext, REQUEST_IN);
         } catch (Exception e) {
-            MEDIATOR_LOGGER.error("Error while reading message context : " + e.getMessage());
+            AXP_ANALYTICS_LOGGER.error("Error while reading message context : " + e.getMessage());
         }
         return true;
     }
@@ -84,7 +84,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             logProperties(messageContext, axis2MessageContext, REQUEST_OUT);
         } catch (Exception e) {
-            MEDIATOR_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
         }
         return true;
     }
@@ -99,7 +99,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             logProperties(messageContext, axis2MessageContext, RESPONSE_IN);
         } catch (Exception e) {
-            MEDIATOR_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
         }
         return true;
     }
@@ -114,7 +114,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             logProperties(messageContext, axis2MessageContext, RESPONSE_OUT);
         } catch (Exception e) {
-            MEDIATOR_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
         } finally {
             LogHandlerUtil.clearLogContext();
         }
@@ -215,7 +215,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             }
 
         }
-        MEDIATOR_LOGGER.info(transactionLog);
+        AXP_ANALYTICS_LOGGER.info(transactionLog);
 
     }
 

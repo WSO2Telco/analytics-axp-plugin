@@ -28,7 +28,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.xml.sax.SAXException;
-
+import static com.wso2telco.util.Constants.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
