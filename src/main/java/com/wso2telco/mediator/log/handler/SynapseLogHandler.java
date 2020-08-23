@@ -3,6 +3,7 @@ package com.wso2telco.mediator.log.handler;
 import com.wso2telco.util.LogHandlerUtil;
 import com.wso2telco.util.PropertyReader;
 import org.apache.synapse.AbstractSynapseHandler;
+import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -27,10 +28,12 @@ import java.util.Map;
 import static com.wso2telco.util.CommonConstant.*;
 import static com.wso2telco.util.Constants.*;
 
-public class SynapseLogHandler extends AbstractSynapseHandler {
+public class SynapseLogHandler extends AbstractSynapseHandler implements ManagedLifecycle {
 
+    @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
+            PropertyReader.setInitialized(true);
             String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + FILE_NAME;
             File fXmlFile = new File(configPath);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -65,11 +68,17 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleRequestInFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, REQUEST_IN);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Error while reading message context : " + e.getMessage());
+        /**Check the init method has initialized or recall the init method */
+        if (!PropertyReader.isInitialized()) {
+            init(null);
+        }
+        if (PropertyReader.isRequestInEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, REQUEST_IN);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error("Error while reading message context : " + e.getMessage());
+            }
         }
         return true;
     }
@@ -80,11 +89,13 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleRequestOutFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, REQUEST_OUT);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+        if (PropertyReader.isRequestOutEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, REQUEST_OUT);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+            }
         }
         return true;
     }
@@ -95,11 +106,13 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, RESPONSE_IN);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+        if (PropertyReader.isResponseInEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, RESPONSE_IN);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+            }
         }
         return true;
     }
@@ -110,14 +123,15 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, RESPONSE_OUT);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
-        } finally {
-            LogHandlerUtil.clearLogContext();
+        if (PropertyReader.isResponseOutEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, RESPONSE_OUT);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+            }
         }
+        LogHandlerUtil.clearLogContext();
         return true;
     }
 
@@ -191,7 +205,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         }
 
         /**Check the request map and recall the init method */
-        if (transactionMap == null || transactionMap.isEmpty()) {
+        if (!PropertyReader.isInitialized()) {
             init(null);
         }
 

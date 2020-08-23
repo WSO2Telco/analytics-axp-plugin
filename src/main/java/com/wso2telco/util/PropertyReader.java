@@ -2,6 +2,7 @@ package com.wso2telco.util;
 
 
 import lombok.Getter;
+import lombok.Setter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -12,6 +13,18 @@ import java.util.LinkedHashMap;
 
 @Getter
 public class PropertyReader {
+
+    @Getter
+    public static boolean requestInEnabled = false;
+    @Getter
+    public static boolean requestOutEnabled = false;
+    @Getter
+    public static boolean responseInEnabled = false;
+    @Getter
+    public static boolean responseOutEnabled = false;
+    @Getter@Setter
+    public static boolean initialized=false;
+
 
     private static HashMap<String, String> requestpropertyMap = new LinkedHashMap();
     private static HashMap<String, String> responsepropertyMap = new LinkedHashMap();
@@ -68,21 +81,25 @@ public class PropertyReader {
                 case (CommonConstant.REQUEST_IN):
                     for (int y = 0; y < requestArray.length; y++) {
                         requestinpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
+                        requestInEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem("enabled").getNodeValue());
                     }
                     break;
                 case (CommonConstant.REQUEST_OUT):
                     for (int y = 0; y < requestArray.length; y++) {
                         requestoutpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
+                        requestOutEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem("enabled").getNodeValue());
                     }
                     break;
                 case (CommonConstant.RESPONSE_IN):
                     for (int y = 0; y < requestArray.length; y++) {
                         responseinpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
+                        responseInEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem("enabled").getNodeValue());
                     }
                     break;
                 case (CommonConstant.RESPONSE_OUT):
                     for (int y = 0; y < requestArray.length; y++) {
                         responseoutpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
+                        responseOutEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem("enabled").getNodeValue());
                     }
                     break;
 

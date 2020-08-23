@@ -71,7 +71,8 @@ public class LogHandlerUtil {
         //Check the tracking id in the message context
         String trackingMessageId = null;
         try {
-            trackingMessageId = headerMap.get(amMapping).toString();
+            if(null!=headerMap.get(amMapping))
+                trackingMessageId = headerMap.get(amMapping).toString();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
