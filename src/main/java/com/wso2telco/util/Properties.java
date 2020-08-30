@@ -6,4 +6,7 @@ public class Properties {
     public static final String LOGMESSAGEDELIMITER = "log.message.delimeter";
     public static final String LOGDATADELIMITER = "log.data.delimeter";
     public static final String AM_MAPPING_ID = "am.mapping.id";
+    private Properties() {
+        throw new IllegalStateException("Utility class");
+    }
 }
