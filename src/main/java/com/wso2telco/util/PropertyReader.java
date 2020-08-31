@@ -2,39 +2,47 @@ package com.wso2telco.util;
 
 
 import lombok.Getter;
+import lombok.Setter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static com.wso2telco.util.CommonConstant.*;
 
 
 @Getter
 public class PropertyReader {
-
-    private static HashMap<String, String> requestpropertyMap = new LinkedHashMap();
-    private static HashMap<String, String> responsepropertyMap = new LinkedHashMap();
-    private static HashMap<String, String> errorpropertyMap = new LinkedHashMap();
     @Getter
-    private static HashMap<String, String> requestinpropertyMap = new LinkedHashMap();
+    public static boolean requestInEnabled = false;
     @Getter
-    private static HashMap<String, String> responseinpropertyMap = new LinkedHashMap();
+    public static boolean requestOutEnabled = false;
     @Getter
-    private static HashMap<String, String> requestoutpropertyMap = new LinkedHashMap();
+    public static boolean responseInEnabled = false;
     @Getter
-    private static HashMap<String, String> responseoutpropertyMap = new LinkedHashMap();
-
-    public static HashMap<String, String> getRequestpropertyMap() {
-        return requestpropertyMap;
-    }
-
-    public static HashMap<String, String> getResponsepropertyMap() {
-        return responsepropertyMap;
-    }
-
-    public static HashMap<String, String> getErrorPropertiesMap() {
-        return errorpropertyMap;
+    public static boolean responseOutEnabled = false;
+    @Getter
+    @Setter
+    public static boolean initialized = false;
+    @Getter
+    private static HashMap<String, String> requestpropertyMap = new LinkedHashMap<>();
+    @Getter
+    private static HashMap<String, String> responsepropertyMap = new LinkedHashMap<>();
+    @Getter
+    private static HashMap<String, String> errorpropertyMap = new LinkedHashMap<>();
+    @Getter
+    private static HashMap<String, String> requestinpropertyMap = new LinkedHashMap<>();
+    @Getter
+    private static HashMap<String, String> responseinpropertyMap = new LinkedHashMap<>();
+    @Getter
+    private static HashMap<String, String> requestoutpropertyMap = new LinkedHashMap<>();
+    @Getter
+    private static HashMap<String, String> responseoutpropertyMap = new LinkedHashMap<>();
+    private PropertyReader() {
+        throw new IllegalStateException("Utility class");
     }
 
     /**
@@ -48,44 +56,40 @@ public class PropertyReader {
         if (requestNode.getNodeType() == Node.ELEMENT_NODE) {
             Element requestElement = (Element) requestNode;
             String requestEl = requestElement.getTextContent().trim();
-            String requestArray[] = requestEl.split("\n");
+            String[] requestArray = requestEl.split("\n");
+            Map<String, String> transactionMap = new LinkedHashMap<>();
             switch (flag) {
                 case (CommonConstant.REQUEST):
-                    for (int y = 0; y < requestArray.length; y++) {
-                        requestpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
-                    }
+                    transactionMap = requestpropertyMap;
                     break;
                 case (CommonConstant.RESPONSE):
-                    for (int y = 0; y < requestArray.length; y++) {
-                        responsepropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
-                    }
+                    transactionMap = responsepropertyMap;
                     break;
                 case (CommonConstant.ERROR_RESPONSE):
-                    for (int y = 0; y < requestArray.length; y++) {
-                        errorpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
-                    }
+                    transactionMap = errorpropertyMap;
                     break;
                 case (CommonConstant.REQUEST_IN):
-                    for (int y = 0; y < requestArray.length; y++) {
-                        requestinpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
-                    }
+                    transactionMap = requestinpropertyMap;
+                    requestInEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem(ENABLED).getNodeValue());
                     break;
                 case (CommonConstant.REQUEST_OUT):
-                    for (int y = 0; y < requestArray.length; y++) {
-                        requestoutpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
-                    }
+                    transactionMap = requestoutpropertyMap;
+                    requestOutEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem(ENABLED).getNodeValue());
                     break;
                 case (CommonConstant.RESPONSE_IN):
-                    for (int y = 0; y < requestArray.length; y++) {
-                        responseinpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
-                    }
+                    transactionMap = responseinpropertyMap;
+                    responseInEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem(ENABLED).getNodeValue());
                     break;
                 case (CommonConstant.RESPONSE_OUT):
-                    for (int y = 0; y < requestArray.length; y++) {
-                        responseoutpropertyMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
-                    }
+                    transactionMap = responseoutpropertyMap;
+                    responseOutEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem(ENABLED).getNodeValue());
                     break;
+                default:
+                    AXP_ANALYTICS_LOGGER.error("Error in Set log Properties" + flag);
+            }
 
+            for (int y = 0; y < requestArray.length; y++) {
+                transactionMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
             }
 
         }

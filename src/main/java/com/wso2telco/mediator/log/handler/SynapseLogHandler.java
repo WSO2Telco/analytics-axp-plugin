@@ -3,6 +3,7 @@ package com.wso2telco.mediator.log.handler;
 import com.wso2telco.util.LogHandlerUtil;
 import com.wso2telco.util.PropertyReader;
 import org.apache.synapse.AbstractSynapseHandler;
+import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -27,13 +28,16 @@ import java.util.Map;
 import static com.wso2telco.util.CommonConstant.*;
 import static com.wso2telco.util.Constants.*;
 
-public class SynapseLogHandler extends AbstractSynapseHandler {
+public class SynapseLogHandler extends AbstractSynapseHandler implements ManagedLifecycle {
 
+    @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
+            PropertyReader.setInitialized(true);
             String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + FILE_NAME;
             File fXmlFile = new File(configPath);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
             Document document = documentBuilder.parse(fXmlFile);
             document.getDocumentElement().normalize();
@@ -45,11 +49,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             PropertyReader.setLogProperties(responseinAttributes, RESPONSE_IN);
             NodeList responseoutAttributes = document.getElementsByTagName(RESPONSE_OUT.toUpperCase());
             PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException er) {
-            er.printStackTrace();
-        } catch (IOException e) {
+        } catch (SAXException | ParserConfigurationException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -65,11 +65,17 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleRequestInFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, REQUEST_IN);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Error while reading message context : " + e.getMessage());
+        /**Check the init method has initialized or recall the init method */
+        if (!PropertyReader.isInitialized()) {
+            init(null);
+        }
+        if (PropertyReader.isRequestInEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, REQUEST_IN);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error("Error while reading message context : " + e.getMessage());
+            }
         }
         return true;
     }
@@ -80,11 +86,13 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleRequestOutFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, REQUEST_OUT);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+        if (PropertyReader.isRequestOutEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, REQUEST_OUT);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error(ERRORINLOGGING + e.getMessage());
+            }
         }
         return true;
     }
@@ -95,11 +103,13 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, RESPONSE_IN);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
+        if (PropertyReader.isResponseInEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, RESPONSE_IN);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error(ERRORINLOGGING + e.getMessage());
+            }
         }
         return true;
     }
@@ -110,14 +120,15 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
      *
      */
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            logProperties(messageContext, axis2MessageContext, RESPONSE_OUT);
-        } catch (Exception e) {
-            AXP_ANALYTICS_LOGGER.error("Unable to set log context due to : " + e.getMessage());
-        } finally {
-            LogHandlerUtil.clearLogContext();
+        if (PropertyReader.isResponseOutEnabled()) {
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                logProperties(messageContext, axis2MessageContext, RESPONSE_OUT);
+            } catch (Exception e) {
+                AXP_ANALYTICS_LOGGER.error(ERRORINLOGGING + e.getMessage());
+            }
         }
+        LogHandlerUtil.clearLogContext();
         return true;
     }
 
@@ -136,9 +147,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             }
         } catch (Exception e) {
             payload = "payload dropped due to invalid format";
-        } finally {
-            return payload;
         }
+        return payload;
     }
 
     /**
@@ -155,9 +165,9 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
             }
         } catch (Exception e) {
             payload = "payload dropped due to invalid format";
-        } finally {
-            return payload;
         }
+        return payload;
+
     }
 
     private void logProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, String typeFlag) throws IOException, XMLStreamException {
@@ -168,7 +178,6 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         StringBuilder transactionLog = new StringBuilder("TRANSACTION:" + typeFlag + LOGMESSAGEDELIMITER + "TIMESTAMP" + LOGDATADELIMITER + timestamp.getTime());
         HashMap<String, String> transactionMap = null;
-        String requestId = null;
 
         switch (typeFlag) {
             case (REQUEST_IN):
@@ -187,30 +196,32 @@ public class SynapseLogHandler extends AbstractSynapseHandler {
                 transactionMap = PropertyReader.getResponseoutpropertyMap();
                 transactionPayload = handleOutPayload(messageContext);
                 break;
+            default:
+                transactionMap = null;
 
         }
 
-        /**Check the request map and recall the init method */
-        if (transactionMap == null || transactionMap.isEmpty()) {
+        /*Check the request map and recall the init method */
+        if (!PropertyReader.isInitialized()) {
             init(null);
         }
 
-        for (String KeyVariable : transactionMap.keySet()) {
+        for (Map.Entry<String, String> entry : transactionMap.entrySet()) {
 
-            String key = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[0];
-            String value = transactionMap.get(KeyVariable).split(String.valueOf(LOGMESSAGEDELIMITER))[1];
+            String key = entry.getValue().split(String.valueOf(','))[0];
+            String value = entry.getValue().split(String.valueOf(','))[1];
 
-            if (null == messageContext.getProperty(MESSAGE_ID) && AM_MAPPING_ID.equalsIgnoreCase(KeyVariable)) {
+            if (null == messageContext.getProperty(MESSAGE_ID) && AM_MAPPING_ID.equalsIgnoreCase(entry.getKey())) {
                 LogHandlerUtil.generateTrackingId(messageContext, key, value);
             } else {
                 if (value.equalsIgnoreCase(MC)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + messageContext.getProperty(key));
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(messageContext.getProperty(key));
                 } else if (value.equalsIgnoreCase(AX)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + axis2MessageContext.getProperty(key));
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(axis2MessageContext.getProperty(key));
                 } else if (value.equalsIgnoreCase(TH)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + headerMap.get(key));
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(headerMap.get(key));
                 } else {
-                    transactionLog.append(LOGMESSAGEDELIMITER + KeyVariable + LOGDATADELIMITER + transactionPayload + LOGDATADELIMITER + KeyVariable);
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(transactionPayload.replaceAll("\n", "")).append(LOGDATADELIMITER).append(entry.getKey());
                 }
             }
 

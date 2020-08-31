@@ -17,8 +17,12 @@ import java.util.UUID;
 import static com.wso2telco.util.CommonConstant.*;
 
 public class LogHandlerUtil {
-    public static org.apache.axis2.context.MessageContext axis2MessageContext;
-    public static Map<String, Object> headerMap;
+    private static org.apache.axis2.context.MessageContext axis2MessageContext;
+    private static Map<String, Object> headerMap;
+
+    private LogHandlerUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /*
      * Sets the required parameters on log4j thread local to enable expected
@@ -51,7 +55,6 @@ public class LogHandlerUtil {
                 log.auditWarn("Unable to set the logging context due to " + e);
             }
         }
-        // }
     }
 
     /*
@@ -64,31 +67,29 @@ public class LogHandlerUtil {
      * @return tracking id string.
      */
     public static void generateTrackingId(MessageContext messageContext, String amMapping, String esbMapping) throws IOException, XMLStreamException {
-        String trackingId;
         RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
         axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         //Check the tracking id in the message context
         String trackingMessageId = null;
         try {
-            trackingMessageId = headerMap.get(amMapping).toString();
+            if (null != headerMap.get(amMapping)) {
+                trackingMessageId = headerMap.get(amMapping).toString();
+            }
+            else{
+                trackingMessageId = messageContext.getMessageID();
+                if (null == trackingMessageId) {
+                    trackingMessageId = UUID.randomUUID().toString();
+                }
+            }
+            messageContext.setProperty(esbMapping, trackingMessageId);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (trackingMessageId == null) {
-                trackingMessageId = (String) messageContext.getMessageID();
-                if (trackingMessageId == null) {
-                    trackingMessageId = UUID.randomUUID().toString();
-                    messageContext.setProperty(esbMapping, trackingMessageId);
-                }
-                messageContext.setProperty(esbMapping, trackingMessageId);
-            } else messageContext.setProperty(esbMapping, trackingMessageId);
         }
 
     }
 
     public static String generateTrackingId(MessageContext context) {
-        String trackingId;
         axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
         headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         //Check the tracking id in the message context
@@ -99,7 +100,7 @@ public class LogHandlerUtil {
             e.printStackTrace();
         }
         if (trackingMessageId == null) {
-            trackingMessageId = (String) context.getMessageID();
+            trackingMessageId = context.getMessageID();
             if (trackingMessageId == null) {
                 trackingMessageId = UUID.randomUUID().toString();
                 context.setProperty(TRACKING_MESSAGE_ID, trackingMessageId);
@@ -114,12 +115,12 @@ public class LogHandlerUtil {
      * @param context synapse message context.
      * @return reference to HTTP header map reference.
      */
-    public static Map getHTTPHeaders(MessageContext context) {
+    public static Map<String, Object> getHTTPHeaders(MessageContext context) {
 
         org.apache.axis2.context.MessageContext axis2MessageCtx =
                 ((Axis2MessageContext) context).getAxis2MessageContext();
 
-        return (Map) axis2MessageCtx.getProperty(
+        return (Map<String, Object>) axis2MessageCtx.getProperty(
                 org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
     }
 

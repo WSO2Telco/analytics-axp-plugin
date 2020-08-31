@@ -22,7 +22,7 @@ public final class Configurations {
     /**
      * Creates the instance is synchronized to avoid multithreads problems
      */
-    private synchronized static void createInstance() {
+    private static synchronized void createInstance() {
         if (instance == null) {
             instance = new Configurations();
         }

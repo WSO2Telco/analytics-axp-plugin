@@ -28,7 +28,6 @@ public final class CommonConstant {
     public static final String TEXT_PLAIN = "text/plain";
 
 
-
     /* Properties use in SynapsLogHandler */
     public static final Log AXP_ANALYTICS_LOGGER = LogFactory.getLog("AXP_ANALYTICS_LOGGER");
     public static final String TRACKING_ID = "RequestId";
@@ -41,4 +40,11 @@ public final class CommonConstant {
     // Key value to hold "to" address of the service.
     public static final String TRACKING_MESSAGE_ID = "REQUEST_ID";
     public static final String HTTP_METHOD = "HTTP_METHOD";
+    public static final String ERRORINLOGGING = "Unable to set log context due to :";
+    public static final String ENABLED = "enabled";
+
+    private CommonConstant() {
+        throw new IllegalStateException("Utility class");
+    }
+
 }

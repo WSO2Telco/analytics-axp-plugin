@@ -28,7 +28,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.xml.sax.SAXException;
-import static com.wso2telco.util.Constants.*;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,8 +38,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.wso2telco.util.CommonConstant.*;
+import static com.wso2telco.util.Constants.*;
 
 public class PropertyLogHandler extends AbstractMediator implements ManagedLifecycle {
+
+    private static String nullOrTrimmed(String inputString) {
+        String result = null;
+        if (inputString != null && inputString.trim().length() > 0) {
+            result = inputString.trim();
+        }
+        return result;
+    }
 
     /**
      * within this method read the XML file and pass the attribute
@@ -51,6 +60,7 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
             String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + FILE_NAME;
             File fXmlFile = new File(configPath);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
             Document document = documentBuilder.parse(fXmlFile);
             document.getDocumentElement().normalize();
@@ -60,12 +70,8 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
             PropertyReader.setLogProperties(responseAttributes, RESPONSE);
             NodeList errorAttributes = document.getElementsByTagName(ERROR_RESPONSE.toUpperCase());
             PropertyReader.setLogProperties(errorAttributes, ERROR_RESPONSE);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException er) {
+        } catch (SAXException | ParserConfigurationException | IOException er) {
             er.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -114,30 +120,34 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
             } else if (typeFlag.equals(RESPONSE)) {
                 transactionMap = PropertyReader.getResponsepropertyMap();
             } else {
-                transactionMap = PropertyReader.getErrorPropertiesMap();
+                transactionMap = PropertyReader.getErrorpropertyMap();
             }
 
             /**Check the request map and recall the init method */
             if (transactionMap.isEmpty()) {
                 init(null);
             }
+            for (Map.Entry<String, String> entry : transactionMap.entrySet()) {
+
+                String key = entry.getValue().split(String.valueOf(','))[0];
+                String value = entry.getValue().split(String.valueOf(','))[1];
 
 
-            for (String i : transactionMap.keySet()) {
-                if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(MC)) {
-                    transactionLog.append("," + i + ":" + messageContext.getProperty(transactionMap.get(i).split(",")[0]));
-                } else if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(AX)) {
-                    transactionLog.append("," + i + ":" + axis2MessageContext.getProperty(transactionMap.get(i).split(",")[0]));
-                } else if (transactionMap.get(i).split(",")[1].equalsIgnoreCase(TH)) {
-                    transactionLog.append("," + i + ":" + headerMap.get(transactionMap.get(i).split(",")[0]));
+                if (value.equalsIgnoreCase(MC)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(messageContext.getProperty(key));
+                } else if (value.equalsIgnoreCase(AX)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(axis2MessageContext.getProperty(key));
+                } else if (value.equalsIgnoreCase(TH)) {
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(headerMap.get(key));
                 } else {
-                    transactionLog.append("," + i + ":" + transactionPayload.replaceAll("\n", ""));
+                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(transactionPayload.replaceAll("\n", ""));
                 }
+
+
             }
             REQUEST_RESPONSE_LOGGER.info(transactionLog);
         }
     }
-
 
     private boolean extractPayloadLoggingStatus(MessageContext messageContext) {
         boolean isPayloadLoggingEnabled = true;
@@ -152,15 +162,6 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
         }
         return isPayloadLoggingEnabled;
     }
-
-    private static String nullOrTrimmed(String inputString) {
-        String result = null;
-        if (inputString != null && inputString.trim().length() > 0) {
-            result = inputString.trim();
-        }
-        return result;
-    }
-
 
     /**
      * method used to handle invalid payloads
