@@ -76,16 +76,15 @@ public class LogHandlerUtil {
             if (null != headerMap.get(amMapping)) {
                 trackingMessageId = headerMap.get(amMapping).toString();
             }
-            if (null == trackingMessageId) {
+            else{
                 trackingMessageId = messageContext.getMessageID();
                 if (null == trackingMessageId) {
                     trackingMessageId = UUID.randomUUID().toString();
                 }
             }
+            messageContext.setProperty(esbMapping, trackingMessageId);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            messageContext.setProperty(esbMapping, trackingMessageId);
         }
 
     }

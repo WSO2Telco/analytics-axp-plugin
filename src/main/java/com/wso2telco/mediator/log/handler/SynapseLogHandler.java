@@ -206,7 +206,6 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             init(null);
         }
 
-        assert transactionMap != null;
         for (Map.Entry<String, String> entry : transactionMap.entrySet()) {
 
             String key = entry.getValue().split(String.valueOf(','))[0];
