@@ -7,10 +7,12 @@ System Requirements
 Enable Request ID and Payload Logging
 =====================================
 
+<b>Make sure to remove previously installed versions of logging-extension from "/wso2telcohub/repository/components/lib" and "wso2telcohub-2.0.0/repository/components/dropins"  before applying new.</b>
+
 Follow below three steps for enabling request ID and payload logging
 
-1) Apply logging-extension-1.0.0-SNAPSHOT.jar to API Manager;
-        a) Copy and paste the 'logging-extension-1.0.0-SNAPSHOT.jar' in to deployed api manager lib directory. (Patch source is available under "/wso2telcohub/repository/components/lib".)
+1) Apply logging-extension-1.1.1.1.jar to API Manager;
+        a) Copy and paste the 'logging-extension-1.1.1.1.jar' in to deployed api manager lib directory. (Patch source is available under "/wso2telcohub/repository/components/lib".)
 
                 The actual deployment path is as follows;
                 wso2telcohub-2.0.0/repository/components/dropins
