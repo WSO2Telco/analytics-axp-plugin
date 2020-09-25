@@ -122,7 +122,7 @@ public class PropertyLogHandler extends AbstractMediator {
             if (transportHeaders != null) {
                 authorization = (String) transportHeaders.get("Authorization");
             }
-            logHandler.info("TRANSACTION:errorResponse," +
+            logHandler.info("TRANSACTION:errorResponse" +
                     ",API_REQUEST_ID:" + axis2MessageContext.getProperty(REQUEST_ID) +
                     ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
                     ",REST_FULL_REQUEST_PATH:" + messageContext.getProperty(REST_FULL_REQUEST_PATH) +
