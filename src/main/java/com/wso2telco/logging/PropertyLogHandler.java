@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.wso2telco.logging;
 
+import java.util.Map;
+
 import org.apache.axiom.om.impl.llom.OMTextImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,6 +108,11 @@ public class PropertyLogHandler extends AbstractMediator {
 
     private void logErrorProperties(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
         if (isPayloadLoggingEnabled) {
+            Map transportHeaders = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            String authorization = null;
+            if (transportHeaders != null) {
+                authorization = (String) transportHeaders.get("Authorization");
+            }
             logHandler.info("TRANSACTION:errorResponse" +
                     ",API_REQUEST_ID:" + messageContext.getProperty(UUID) +
                     ",REQUEST_BODY:" + messageContext.getEnvelope().getBody().toString() +
@@ -118,7 +125,8 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",APPLICATION_ID:" + messageContext.getProperty(APPLICATION_ID) +
                     ",ERROR_CODE:" + messageContext.getProperty(ERROR_CODE) +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
-                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE)
+                    ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE) +
+                    ",AUTHORIZATION:" + authorization
                 );
         }
     }

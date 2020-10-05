@@ -24,7 +24,7 @@
     <artifactId>logging-extension</artifactId>
     <name>logging-extension</name>
 
-    <version>1.5.0</version>
+    <version>1.5.0.1</version>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
@@ -154,8 +154,3 @@
         </plugins>
     </build>
 </project>
-
-
-
-
-
