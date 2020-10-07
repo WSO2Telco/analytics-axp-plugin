@@ -58,5 +58,6 @@
         <METHOD>api.ut.HTTP_METHOD,MC</METHOD>
         <BODY>BODY,RP</BODY>
         <HTTP_STATUS>HTTP_SC,AX</HTTP_STATUS>
+        <Authorization>Authorization,TH</Authorization>
     </RESPONSE_OUT>
 </logExtensionConfig>
