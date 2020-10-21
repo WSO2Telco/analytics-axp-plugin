@@ -102,11 +102,6 @@
             <version>4.4.34</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
-            <version>5.0.3</version>
-        </dependency>
     </dependencies>
     <repositories>
         <repository>
