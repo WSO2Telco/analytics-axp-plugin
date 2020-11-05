@@ -34,6 +34,7 @@ public class PropertyLogHandler extends AbstractMediator {
     private static final String APPLICATION_ID = "api.ut.application.id";
     private static final String API_PUBLISHER = "api.ut.apiPublisher";
     private static final String API_NAME = "API_NAME";
+    private static final String REMOTE_HOST = "REMOTE_HOST";
     private static final String SP_NAME = "api.ut.userName";
     private static final String REQUEST = "request";
     private static final String RESPONSE = "response";
@@ -89,8 +90,9 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",CONSUMER_KEY:" + messageContext.getProperty(CONSUMER_KEY) +
                     ",API_RESOURCE_PATH:" + messageContext.getProperty(REST_SUB_REQUEST_PATH) +
                     ",METHOD:" + messageContext.getProperty(METHOD) +
-                    ",BODY:" + requestPayload.replaceAll("\n", "")
-                );
+                    ",BODY:" + requestPayload.replaceAll("\n", "") +
+                    ",REMOTE_HOST:" + axis2MessageContext.getProperty(REMOTE_HOST)
+            );
         }
     }
 
@@ -127,7 +129,7 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
                     ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE) +
                     ",AUTHORIZATION:" + authorization
-                );
+            );
         }
     }
 
