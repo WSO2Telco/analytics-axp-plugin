@@ -54,8 +54,6 @@ Follow below three steps for enabling request ID and payload logging
 	      <property name="message.type" scope="axis2" type="STRING" value="error"/>
         <class name="com.wso2telco.logging.PropertyLogHandler"/>
 
-
-
 Enable Payload body from registry
 =================================
 
@@ -65,5 +63,4 @@ go to _system/governance/apimgt
 2) Click on "Add Resource" and select the "Create text contant" in Method
 
 3) Please insert Name: payload.logging.enabled and Content :true and save
-
 
