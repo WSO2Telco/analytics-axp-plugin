@@ -1,5 +1,6 @@
 package com.wso2telco.mediator.log.handler;
 
+import com.wso2telco.kafka.MessageSender;
 import com.wso2telco.util.LogHandlerUtil;
 import com.wso2telco.util.PropertyReader;
 import org.apache.synapse.AbstractSynapseHandler;
@@ -49,6 +50,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             PropertyReader.setLogProperties(responseinAttributes, RESPONSE_IN);
             NodeList responseoutAttributes = document.getElementsByTagName(RESPONSE_OUT.toUpperCase());
             PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
+            NodeList kafkaAttributes = document.getElementsByTagName(KAFKA_CONFIGURATION.toUpperCase());
+            PropertyReader.setLogProperties(kafkaAttributes, KAFKA_CONFIGURATION);
         } catch (SAXException | ParserConfigurationException | IOException e) {
             e.printStackTrace();
         }
@@ -226,7 +229,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             }
 
         }
-        AXP_ANALYTICS_LOGGER.info(transactionLog);
+        MessageSender messageSender = new MessageSender();
+        messageSender.sendMessage(transactionLog.toString());
 
     }
 

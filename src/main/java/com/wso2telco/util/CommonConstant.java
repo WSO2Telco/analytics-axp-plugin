@@ -14,6 +14,7 @@ public final class CommonConstant {
     public static final String REQUEST_OUT = "request_out";
     public static final String RESPONSE_IN = "response_in";
     public static final String RESPONSE_OUT = "response_out";
+    public static final String KAFKA_CONFIGURATION = "kafka_configuration";
     public static final String ERROR_RESPONSE = "errorResponse";
     public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final String ERROR = "error";
@@ -42,6 +43,16 @@ public final class CommonConstant {
     public static final String HTTP_METHOD = "HTTP_METHOD";
     public static final String ERRORINLOGGING = "Unable to set log context due to :";
     public static final String ENABLED = "enabled";
+
+
+    /* kafka related properties */
+    public static String KAFKA_HOST = "KAFKA_HOST";
+    public static String KAFKA_PORT = "KAFKA_PORT";
+    public static String RETRIES_CONFIG = "RETRIES_CONFIG";
+    public static String TRANSACTION_TIMEOUT_CONFIG = "TRANSACTION_TIMEOUT_CONFIG";
+    public static String KAFKA_TOPIC = "KAFKA_TOPIC";
+    public static String MAX_THREAD_COUNT = "MAX_THREAD_COUNT";
+    public static boolean kafkaEnabled = false;
 
     private CommonConstant() {
         throw new IllegalStateException("Utility class");
