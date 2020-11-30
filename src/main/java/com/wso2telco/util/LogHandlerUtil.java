@@ -89,6 +89,15 @@ public class LogHandlerUtil {
 
     }
 
+    public static void setAccessTokenMC(MessageContext messageContext){
+        axis2MessageContext = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Object accessToken=headerMap.get("Authorization");
+        if(null!=accessToken){
+            messageContext.setProperty("Authorization", accessToken);
+        }
+    }
+
     public static String generateTrackingId(MessageContext context) {
         axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
         headerMap = (Map<String, Object>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);

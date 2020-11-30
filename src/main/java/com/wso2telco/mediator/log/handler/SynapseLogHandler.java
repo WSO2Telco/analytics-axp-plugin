@@ -22,6 +22,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.temporal.ValueRange;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -139,6 +140,10 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
         String payload = "";
         try {
             RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
+        } catch (Exception e) {
+            AXP_ANALYTICS_LOGGER.error(ERRORINLOGGING + e.getMessage());
+        }
+        try {
             if (JsonUtil.hasAJsonPayload(((Axis2MessageContext) messageContext).getAxis2MessageContext())) {
                 JSONObject jsonPayload = new JSONObject(JsonUtil.jsonPayloadToString(((Axis2MessageContext) messageContext).getAxis2MessageContext()));
                 payload = jsonPayload.toString();
@@ -182,6 +187,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
         switch (typeFlag) {
             case (REQUEST_IN):
                 transactionMap = PropertyReader.getRequestinpropertyMap();
+                LogHandlerUtil.setAccessTokenMC(messageContext);
                 transactionPayload = handleInPayload(messageContext);
                 break;
             case (REQUEST_OUT):
@@ -201,11 +207,6 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
 
         }
 
-        /*Check the request map and recall the init method */
-        if (!PropertyReader.isInitialized()) {
-            init(null);
-        }
-
         for (Map.Entry<String, String> entry : transactionMap.entrySet()) {
 
             String key = entry.getValue().split(String.valueOf(','))[0];
@@ -213,15 +214,25 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
 
             if (null == messageContext.getProperty(MESSAGE_ID) && AM_MAPPING_ID.equalsIgnoreCase(entry.getKey())) {
                 LogHandlerUtil.generateTrackingId(messageContext, key, value);
-            } else {
-                if (value.equalsIgnoreCase(MC)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(messageContext.getProperty(key));
-                } else if (value.equalsIgnoreCase(AX)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(axis2MessageContext.getProperty(key));
-                } else if (value.equalsIgnoreCase(TH)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(headerMap.get(key));
+            } else if (entry.getKey().equalsIgnoreCase("Authorization")) {
+                if (!ValueRange.of(199, 399).isValidIntValue(Integer.parseInt(axis2MessageContext.getProperty("HTTP_SC").toString()))) {
+                    logAppender(transactionLog, entry.getKey(), messageContext.getProperty(key));
                 } else {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(transactionPayload.replaceAll("\n", "")).append(LOGDATADELIMITER).append(entry.getKey());
+                    logAppender(transactionLog, entry.getKey(), null);
+                }
+            } else {
+                switch (value) {
+                    case ("MC"):
+                        logAppender(transactionLog, entry.getKey(), messageContext.getProperty(key));
+                        break;
+                    case ("AX"):
+                        logAppender(transactionLog, entry.getKey(), axis2MessageContext.getProperty(key));
+                        break;
+                    case ("TH"):
+                        logAppender(transactionLog, entry.getKey(), headerMap.get(key));
+                        break;
+                    default:
+                        logAppender(transactionLog, entry.getKey(), transactionPayload.replaceAll("\n", "")).append(LOGDATADELIMITER).append(entry.getKey());
                 }
             }
 
@@ -230,4 +241,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
 
     }
 
+    private StringBuilder logAppender(StringBuilder transactionLog, String key, Object logData) {
+        transactionLog.append(LOGMESSAGEDELIMITER).append(key).append(LOGDATADELIMITER).append(logData);
+        return transactionLog;
+    }
 }
