@@ -52,6 +52,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
             NodeList kafkaAttributes = document.getElementsByTagName(KAFKA_CONFIGURATION.toUpperCase());
             PropertyReader.setLogProperties(kafkaAttributes, KAFKA_CONFIGURATION);
+
         } catch (SAXException | ParserConfigurationException | IOException e) {
             e.printStackTrace();
         }
