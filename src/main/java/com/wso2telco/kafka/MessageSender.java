@@ -22,8 +22,6 @@ public class MessageSender {
         if (System.currentTimeMillis() - PropertyReader.getRuntimeKafkaUpdateMillis() >= RUNTIMEKAFKA_FRESHNESS_THRESHOLD)
             PropertyReader.setRuntimeKafkaEnabled(true);
         long temp = System.currentTimeMillis() - PropertyReader.getRuntimeKafkaUpdateMillis();
-        AXP_ANALYTICS_LOGGER.info("Time diff" + temp + ">=" + RUNTIMEKAFKA_FRESHNESS_THRESHOLD);
-        AXP_ANALYTICS_LOGGER.info("Inside enabled kafka" + PropertyReader.isRuntimeKafkaEnabled());
         ExecutorService executor = Executors.newFixedThreadPool(Integer.parseInt(CommonConstant.MAX_THREAD_COUNT));
         Runnable worker = new KafkaThreadCreator(transactionLog);
         executor.execute(worker);
@@ -71,7 +69,6 @@ public class MessageSender {
                     producer.close();
                 }
             } else {
-                transactionLog.replaceAll("BODY:(.*):BODY,", "");
                 AXP_ANALYTICS_LOGGER.info(transactionLog.replaceAll(",BODY:(.*):BODY", ""));
 
             }
