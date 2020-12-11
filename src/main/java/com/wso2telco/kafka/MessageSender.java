@@ -1,6 +1,7 @@
 package com.wso2telco.kafka;
 
 
+import com.wso2telco.scheduler.ScheduleTimerTask;
 import com.wso2telco.util.CommonConstant;
 import com.wso2telco.util.PropertyReader;
 import org.apache.kafka.clients.producer.Callback;
@@ -19,9 +20,6 @@ public class MessageSender {
 
 
     public void sendMessage(String transactionLog) {
-        if (System.currentTimeMillis() - PropertyReader.getRuntimeKafkaUpdateMillis() >= RUNTIMEKAFKA_FRESHNESS_THRESHOLD)
-            PropertyReader.setRuntimeKafkaEnabled(true);
-        long temp = System.currentTimeMillis() - PropertyReader.getRuntimeKafkaUpdateMillis();
         ExecutorService executor = Executors.newFixedThreadPool(Integer.parseInt(CommonConstant.MAX_THREAD_COUNT));
         Runnable worker = new KafkaThreadCreator(transactionLog);
         executor.execute(worker);
@@ -59,8 +57,7 @@ public class MessageSender {
                         });
                     }
                     if ((PropertyReader.getErrorCount().getVariable() > 5) && PropertyReader.isRuntimeKafkaEnabled()) {
-                        PropertyReader.setRuntimeKafkaEnabled(false);
-                        PropertyReader.setRuntimeKafkaUpdateMillis(System.currentTimeMillis());
+                        ScheduleTimerTask.runTimerDisableRuntimeKafka();
                     }
 
 

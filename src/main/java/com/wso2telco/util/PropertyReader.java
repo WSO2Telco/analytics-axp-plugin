@@ -53,6 +53,8 @@ public class PropertyReader {
     private static boolean runtimeKafkaEnabled=true;
     @Getter@Setter
     private static long runtimeKafkaUpdateMillis=Long.MAX_VALUE;
+    @Getter@Setter
+    private static HealthCheckHttpClient healthCheckClient=new HealthCheckHttpClient();
 
     /**
      * Set the transaction properties
