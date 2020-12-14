@@ -52,6 +52,7 @@ public final class CommonConstant {
     public static String TRANSACTION_TIMEOUT_CONFIG = "TRANSACTION_TIMEOUT_CONFIG";
     public static String KAFKA_TOPIC = "KAFKA_TOPIC";
     public static String MAX_THREAD_COUNT = "MAX_THREAD_COUNT";
+    public static String MAX_BLOCK_MS = "MAX_BLOCK_MS";
     public static boolean kafkaEnabled = false;
 
     private CommonConstant() {

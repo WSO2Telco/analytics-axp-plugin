@@ -124,6 +124,9 @@ public class PropertyReader {
                 case "MAX_THREAD_COUNT":
                     MAX_THREAD_COUNT = requestArray[y].trim();
                     break;
+                case "MAX_BLOCK_MS":
+                    MAX_BLOCK_MS = requestArray[y].trim();
+                    break;
 
             }
         }

@@ -18,6 +18,7 @@ public class KafkaProducer {
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true"); // For an idempotent producer
         properties.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, CommonConstant.TRANSACTION_TIMEOUT_CONFIG);
+        properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, CommonConstant.MAX_BLOCK_MS);
 
         //kafka can detect whether it's a duplicate data based on the producer request id.
 
