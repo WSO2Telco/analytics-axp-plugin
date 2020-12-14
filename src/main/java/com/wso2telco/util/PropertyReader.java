@@ -47,6 +47,14 @@ public class PropertyReader {
     private PropertyReader() {
         throw new IllegalStateException("Utility class");
     }
+    @Getter@Setter
+    private static TimeOutCount errorCount=new TimeOutCount();
+    @Getter@Setter
+    private static boolean runtimeKafkaEnabled=true;
+    @Getter@Setter
+    private static long runtimeKafkaUpdateMillis=Long.MAX_VALUE;
+    @Getter@Setter
+    private static HealthCheckHttpClient healthCheckClient=new HealthCheckHttpClient();
 
     /**
      * Set the transaction properties

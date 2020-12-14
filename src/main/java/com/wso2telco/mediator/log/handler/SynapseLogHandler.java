@@ -1,6 +1,7 @@
 package com.wso2telco.mediator.log.handler;
 
 import com.wso2telco.kafka.MessageSender;
+import com.wso2telco.scheduler.ScheduleTimerTask;
 import com.wso2telco.util.LogHandlerUtil;
 import com.wso2telco.util.PropertyReader;
 import org.apache.synapse.AbstractSynapseHandler;
@@ -29,12 +30,14 @@ import java.util.Map;
 import static com.wso2telco.util.CommonConstant.*;
 import static com.wso2telco.util.Constants.*;
 
+
 public class SynapseLogHandler extends AbstractSynapseHandler implements ManagedLifecycle {
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
             PropertyReader.setInitialized(true);
+            ScheduleTimerTask.runTimerHealthCheck();
             String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + FILE_NAME;
             File fXmlFile = new File(configPath);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -52,6 +55,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
             NodeList kafkaAttributes = document.getElementsByTagName(KAFKA_CONFIGURATION.toUpperCase());
             PropertyReader.setLogProperties(kafkaAttributes, KAFKA_CONFIGURATION);
+
         } catch (SAXException | ParserConfigurationException | IOException e) {
             e.printStackTrace();
         }
