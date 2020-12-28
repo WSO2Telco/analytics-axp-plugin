@@ -9,12 +9,12 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
+import java.net.InetAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.wso2telco.util.CommonConstant.AXP_ANALYTICS_LOGGER;
 import static com.wso2telco.util.CommonConstant.kafkaEnabled;
-import static com.wso2telco.util.Constants.RUNTIMEKAFKA_FRESHNESS_THRESHOLD;
 
 public class MessageSender {
 
@@ -25,12 +25,22 @@ public class MessageSender {
         executor.execute(worker);
     }
 
+
     public static class KafkaThreadCreator implements Runnable {
+
 
         private final String transactionLog;
 
         KafkaThreadCreator(String transactionLog) {
             this.transactionLog = transactionLog;
+        }
+
+        private static String getHostname() {
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         @Override
@@ -39,6 +49,7 @@ public class MessageSender {
                 com.wso2telco.kafka.KafkaProducer kafkaProducer = new com.wso2telco.kafka.KafkaProducer();
                 Producer<String, String> producer = kafkaProducer.createKafkaProducer();
                 int sendMessageCount = 1;
+                String transactionLogMsg = transactionLog + ",HOSTNAME:"+ getHostname().toLowerCase();
 
                 long time = System.currentTimeMillis();
 
@@ -46,11 +57,11 @@ public class MessageSender {
                     for (long index = time; index < time + sendMessageCount; index++) {
                         final ProducerRecord<String, String> record =
                                 new ProducerRecord<String, String>(CommonConstant.KAFKA_TOPIC, String.valueOf(index),
-                                        transactionLog);
+                                        transactionLogMsg);
                         producer.send(record, new Callback() {
                             public void onCompletion(RecordMetadata metadata, Exception e) {
                                 if (e != null) {
-                                    AXP_ANALYTICS_LOGGER.info(transactionLog.replaceAll(",BODY:(.*):BODY", ""));
+                                    AXP_ANALYTICS_LOGGER.info(transactionLogMsg.replaceAll(",BODY:(.*):BODY", ""));
                                     PropertyReader.getErrorCount().setVariable(PropertyReader.getErrorCount().getVariable() + 1);
                                 }
                             }
