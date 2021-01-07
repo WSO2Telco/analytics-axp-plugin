@@ -128,7 +128,8 @@ public class PropertyLogHandler extends AbstractMediator {
                     ",ERROR_CODE:" + messageContext.getProperty(ERROR_CODE) +
                     ",HTTP_STATUS:" + axis2MessageContext.getProperty(HTTP_SC) + "" +
                     ",ERROR_MESSAGE:" + messageContext.getProperty(ERROR_MESSAGE) +
-                    ",AUTHORIZATION:" + authorization
+                    ",AUTHORIZATION:" + authorization +
+                    ",REMOTE_HOST:" + axis2MessageContext.getProperty(REMOTE_HOST)
             );
         }
     }
