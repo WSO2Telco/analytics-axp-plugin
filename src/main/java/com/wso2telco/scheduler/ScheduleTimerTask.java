@@ -31,8 +31,10 @@ public class ScheduleTimerTask extends TimerTask {
 
     @Override
     public void run() {
-        HealthCheckHttpClient healthCheckClient = new HealthCheckHttpClient();
-        //assuming it takes 20 secs to complete the task
-        healthCheckClient.kafkaConsumerCheckHealth();
+        if(Boolean.valueOf(PropertyReader.getKafkaProperties().get(Properties.HEALTH_CHECK_ACTIVE))) {
+            HealthCheckHttpClient healthCheckClient = new HealthCheckHttpClient();
+            //assuming it takes 20 secs to complete the task
+            healthCheckClient.kafkaConsumerCheckHealth();
+        }
     }
 }
