@@ -14,7 +14,6 @@ public final class CommonConstant {
     public static final String REQUEST_OUT = "request_out";
     public static final String RESPONSE_IN = "response_in";
     public static final String RESPONSE_OUT = "response_out";
-    public static final String KAFKA_CONFIGURATION = "kafka_configuration";
     public static final String ERROR_RESPONSE = "errorResponse";
     public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final String ERROR = "error";
