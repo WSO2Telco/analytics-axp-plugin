@@ -28,7 +28,6 @@ public final class CommonConstant {
     public static final String APPLICATION_JSON = "application/json";
     public static final String TEXT_PLAIN = "text/plain";
 
-
     /* Properties use in SynapsLogHandler */
     public static final Log AXP_ANALYTICS_LOGGER = LogFactory.getLog("AXP_ANALYTICS_LOGGER");
     public static final String TRACKING_ID = "RequestId";
@@ -44,16 +43,12 @@ public final class CommonConstant {
     public static final String ERRORINLOGGING = "Unable to set log context due to :";
     public static final String ENABLED = "enabled";
 
-
-    /* kafka related properties */
-    public static String KAFKA_HOST = "KAFKA_HOST";
-    public static String KAFKA_PORT = "KAFKA_PORT";
-    public static String RETRIES_CONFIG = "RETRIES_CONFIG";
-    public static String TRANSACTION_TIMEOUT_CONFIG = "TRANSACTION_TIMEOUT_CONFIG";
-    public static String KAFKA_TOPIC = "KAFKA_TOPIC";
-    public static String MAX_THREAD_COUNT = "MAX_THREAD_COUNT";
-    public static String MAX_BLOCK_MS = "MAX_BLOCK_MS";
-    public static boolean kafkaEnabled = false;
+    /* properties use for kafka integration*/
+    public static String KAFKA_CONFIGURATION_FILE = "kafkaconfig.properties";
+    public static String TRANSACTION_PROPERTY_CONFIGURATION_FILE = "logExtensionConfig.xml";
+    public static String LOG_MESSAGE_DELIMITER = ",";
+    public static String LOG_DATA_DELIMITER = ":";
+    public static String AM_MAPPING_ID = "AM_MAPPING_ID";
 
     private CommonConstant() {
         throw new IllegalStateException("Utility class");

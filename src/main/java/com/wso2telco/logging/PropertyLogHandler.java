@@ -24,21 +24,11 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.json.XML;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.wso2telco.util.CommonConstant.*;
-import static com.wso2telco.util.Constants.*;
 
 public class PropertyLogHandler extends AbstractMediator implements ManagedLifecycle {
 
@@ -56,23 +46,8 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
      * @param synapseEnvironment
      */
     public void init(SynapseEnvironment synapseEnvironment) {
-        try {
-            String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + FILE_NAME;
-            File fXmlFile = new File(configPath);
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
-            Document document = documentBuilder.parse(fXmlFile);
-            document.getDocumentElement().normalize();
-            NodeList requestAttributes = document.getElementsByTagName(REQUEST.toUpperCase());
-            PropertyReader.setLogProperties(requestAttributes, REQUEST);
-            NodeList responseAttributes = document.getElementsByTagName(RESPONSE.toUpperCase());
-            PropertyReader.setLogProperties(responseAttributes, RESPONSE);
-            NodeList errorAttributes = document.getElementsByTagName(ERROR_RESPONSE.toUpperCase());
-            PropertyReader.setLogProperties(errorAttributes, ERROR_RESPONSE);
-        } catch (SAXException | ParserConfigurationException | IOException er) {
-            er.printStackTrace();
-        }
+        PropertyReader propertyReader = new PropertyReader();
+        propertyReader.readGatewayTransactionProperties();
     }
 
     public void destroy() {
@@ -134,13 +109,13 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
 
 
                 if (value.equalsIgnoreCase(MC)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(messageContext.getProperty(key));
+                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(messageContext.getProperty(key));
                 } else if (value.equalsIgnoreCase(AX)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(axis2MessageContext.getProperty(key));
+                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(axis2MessageContext.getProperty(key));
                 } else if (value.equalsIgnoreCase(TH)) {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(headerMap.get(key));
+                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(headerMap.get(key));
                 } else {
-                    transactionLog.append(LOGMESSAGEDELIMITER).append(entry.getKey()).append(LOGDATADELIMITER).append(transactionPayload.replaceAll("\n", ""));
+                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(transactionPayload.replaceAll("\n", ""));
                 }
 
 

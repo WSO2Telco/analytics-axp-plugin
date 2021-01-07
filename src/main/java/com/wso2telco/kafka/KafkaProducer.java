@@ -1,24 +1,27 @@
 package com.wso2telco.kafka;
 
-import com.wso2telco.util.CommonConstant;
+import com.wso2telco.util.Properties;
+import com.wso2telco.util.PropertyReader;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import java.util.Properties;
 
 public class KafkaProducer {
 
-
     public org.apache.kafka.clients.producer.KafkaProducer<String, String> createKafkaProducer() {
         //Create Producer Properties
-        Properties properties = new Properties();
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CommonConstant.KAFKA_HOST+":"+CommonConstant.KAFKA_PORT);
+        java.util.Properties properties = new java.util.Properties();
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, PropertyReader.getKafkaProperties()
+                .get(Properties.KAFKA_HOST)+":"+ PropertyReader.getKafkaProperties().get(Properties.KAFKA_PORT));
         properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-        properties.setProperty(ProducerConfig.RETRIES_CONFIG, CommonConstant.RETRIES_CONFIG);
+        properties.setProperty(ProducerConfig.RETRIES_CONFIG, PropertyReader.getKafkaProperties()
+                .get(Properties.RETRIES_CONFIG));
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true"); // For an idempotent producer
-        properties.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, CommonConstant.TRANSACTION_TIMEOUT_CONFIG);
-        properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, CommonConstant.MAX_BLOCK_MS);
+        properties.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, PropertyReader.getKafkaProperties()
+                .get(Properties.TRANSACTION_TIMEOUT_CONFIG));
+        properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, PropertyReader.getKafkaProperties()
+                .get(Properties.MAX_BLOCK_MS));
 
         //kafka can detect whether it's a duplicate data based on the producer request id.
 
@@ -31,10 +34,5 @@ public class KafkaProducer {
         org.apache.kafka.clients.producer.KafkaProducer<String, String> logProducer = new org.apache.kafka.clients.producer.KafkaProducer<String, String>(properties);
         return logProducer;
     }
-
-
-
-
-
 
 }
