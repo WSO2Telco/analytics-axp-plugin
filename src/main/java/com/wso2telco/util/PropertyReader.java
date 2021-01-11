@@ -1,22 +1,31 @@
 package com.wso2telco.util;
 
-
 import lombok.Getter;
 import lombok.Setter;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.xml.sax.SAXException;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.Properties;
 
 import static com.wso2telco.util.CommonConstant.*;
-import static com.wso2telco.util.Constants.AM_MAPPING_ID;
-
 
 @Getter
 public class PropertyReader {
+
+    @Getter
+    static HashMap<String, String> kafkaProperties = new HashMap<>();
     @Getter
     public static boolean requestInEnabled = false;
     @Getter
@@ -42,19 +51,13 @@ public class PropertyReader {
     private static HashMap<String, String> requestoutpropertyMap = new LinkedHashMap<>();
     @Getter
     private static HashMap<String, String> responseoutpropertyMap = new LinkedHashMap<>();
-    @Getter
-    private static HashMap<String, String> kafkaPropertyMap = new LinkedHashMap<>();
-    private PropertyReader() {
-        throw new IllegalStateException("Utility class");
-    }
     @Getter@Setter
     private static TimeOutCount errorCount=new TimeOutCount();
     @Getter@Setter
     private static boolean runtimeKafkaEnabled=true;
     @Getter@Setter
     private static long runtimeKafkaUpdateMillis=Long.MAX_VALUE;
-    @Getter@Setter
-    private static HealthCheckHttpClient healthCheckClient=new HealthCheckHttpClient();
+
 
     /**
      * Set the transaction properties
@@ -95,49 +98,92 @@ public class PropertyReader {
                     transactionMap = responseoutpropertyMap;
                     responseOutEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem(ENABLED).getNodeValue());
                     break;
-                case KAFKA_CONFIGURATION:
-                    setKafkaProperties(requestArray, requestElement);
-                    kafkaEnabled = Boolean.parseBoolean(requestNode.getAttributes().getNamedItem(ENABLED).getNodeValue());
-                    break;
-                default:
+                 default:
                     AXP_ANALYTICS_LOGGER.error("Error in Set log Properties" + flag);
             }
-            if(!flag.equalsIgnoreCase(KAFKA_CONFIGURATION)) {
                 for (int y = 0; y < requestArray.length; y++) {
                     transactionMap.put(requestElement.getElementsByTagName("*").item((y)).getNodeName(), requestArray[y].trim());
                 }
-            }
-
         }
     }
 
-    static void setKafkaProperties(String[] requestArray, Element requestElement) {
-        for (int y = 0; y < requestArray.length; y++) {
-            switch (requestElement.getElementsByTagName("*").item((y)).getNodeName()) {
-                case "KAFKA_HOST":
-                    KAFKA_HOST = requestArray[y].trim();
-                    break;
-                case "KAFKA_PORT":
-                    KAFKA_PORT = requestArray[y].trim();
-                    break;
-                case "RETRIES_CONFIG":
-                    RETRIES_CONFIG = requestArray[y].trim();
-                    break;
-                case "TRANSACTION_TIMEOUT_CONFIG":
-                    TRANSACTION_TIMEOUT_CONFIG = requestArray[y].trim();
-                    break;
-                case "KAFKA_TOPIC":
-                    KAFKA_TOPIC = requestArray[y].trim();
-                    break;
-                case "MAX_THREAD_COUNT":
-                    MAX_THREAD_COUNT = requestArray[y].trim();
-                    break;
-                case "MAX_BLOCK_MS":
-                    MAX_BLOCK_MS = requestArray[y].trim();
-                    break;
+    public void readKafkaProperties() {
 
+        java.util.Properties prop = new Properties();
+        InputStream input = null;
+
+        try {
+            String absolutePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + CommonConstant.KAFKA_CONFIGURATION_FILE;
+            input = new FileInputStream(absolutePath);
+
+            // load a properties file
+            prop.load(input);
+            Enumeration<?> e = prop.propertyNames();
+            while (e.hasMoreElements()) {
+                String key = (String) e.nextElement();
+                String value = prop.getProperty(key);
+                //TODO remove sout
+                System.out.println("KEY.."+ key);
+                System.out.println("VALUE.."+ value);
+                kafkaProperties.put(key, value);
+            }
+
+        } catch (IOException ex) {
+            //TODO log error message
+            ex.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
+
     }
 
+    public void readMediatorTransactionProperties() {
+        try{
+            String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + CommonConstant.TRANSACTION_PROPERTY_CONFIGURATION_FILE;
+            File fXmlFile = new File(configPath);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
+            Document document = documentBuilder.parse(fXmlFile);
+            document.getDocumentElement().normalize();
+            NodeList requestinAttributes = document.getElementsByTagName(REQUEST_IN.toUpperCase());
+            PropertyReader.setLogProperties(requestinAttributes, REQUEST_IN);
+            NodeList requestoutAttributes = document.getElementsByTagName(REQUEST_OUT.toUpperCase());
+            PropertyReader.setLogProperties(requestoutAttributes, REQUEST_OUT);
+            NodeList responseinAttributes = document.getElementsByTagName(RESPONSE_IN.toUpperCase());
+            PropertyReader.setLogProperties(responseinAttributes, RESPONSE_IN);
+            NodeList responseoutAttributes = document.getElementsByTagName(RESPONSE_OUT.toUpperCase());
+            PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
+        } catch (SAXException | ParserConfigurationException | IOException e) {
+            e.printStackTrace();
+        }
+        //TODO check file close operation required or not
+    }
+
+    public void readGatewayTransactionProperties() {
+        try {
+            String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + CommonConstant.TRANSACTION_PROPERTY_CONFIGURATION_FILE;
+            File fXmlFile = new File(configPath);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
+            Document document = documentBuilder.parse(fXmlFile);
+            document.getDocumentElement().normalize();
+            NodeList requestAttributes = document.getElementsByTagName(REQUEST.toUpperCase());
+            PropertyReader.setLogProperties(requestAttributes, REQUEST);
+            NodeList responseAttributes = document.getElementsByTagName(RESPONSE.toUpperCase());
+            PropertyReader.setLogProperties(responseAttributes, RESPONSE);
+            NodeList errorAttributes = document.getElementsByTagName(ERROR_RESPONSE.toUpperCase());
+            PropertyReader.setLogProperties(errorAttributes, ERROR_RESPONSE);
+        } catch (SAXException | ParserConfigurationException | IOException er) {
+            er.printStackTrace();
+        }
+        //TODO check file close operation required or not
+    }
 }

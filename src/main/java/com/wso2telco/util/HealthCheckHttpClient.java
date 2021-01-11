@@ -1,6 +1,8 @@
 package com.wso2telco.util;
 
 import com.wso2telco.scheduler.ScheduleTimerTask;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -11,41 +13,71 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static com.wso2telco.util.Constants.*;
-
 public class HealthCheckHttpClient {
 
+    private static final String KAFKA_CONSUMER_OBJECT = "status";
+    private static final String KAFKA_CONSUMER_STATUS_STRING = "status";
+    private static final String KAFKA_CONSUMER_STATUS = "OK";
 
-    private String healthCheckUrl = "http://" + HEALTHCHECK_HOST + ":" + HEALTHCHECK_PORT + "/v3/kafka/local/consumer/" + HEALTHCHECK_CONSUMER_ID + "/status";
+    public void kafkaConsumerCheckHealth() {
+        CloseableHttpClient httpClient = null;
+        CloseableHttpResponse closeableHttpResponse = null;
 
-
-    public void kafkaConsumerCheckHealth() throws IOException {
         try{
-            CloseableHttpClient httpClient = HttpClients.createDefault();
+            String healthCheckUrl = buildHealthCheckUrl();
+            httpClient = HttpClients.createDefault();
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000).setConnectionRequestTimeout(5000).build();
             HttpGet httpGet = new HttpGet(healthCheckUrl);
-            CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+            httpGet.setConfig(requestConfig);
+            closeableHttpResponse = httpClient.execute(httpGet);
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    httpResponse.getEntity().getContent()));
+            int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
 
-            String inputLine;
-            StringBuffer response = new StringBuffer();
+            if(statusCode == HttpStatus.SC_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        closeableHttpResponse.getEntity().getContent()));
 
-            while ((inputLine = reader.readLine()) != null) {
-                response.append(inputLine);
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = reader.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                reader.close();
+                JSONObject obj = new JSONObject(response.toString());
+                String kafkaConsumerStatus = obj.getJSONObject(KAFKA_CONSUMER_OBJECT).getString(KAFKA_CONSUMER_STATUS_STRING);
+                if (kafkaConsumerStatus.equalsIgnoreCase(KAFKA_CONSUMER_STATUS) && PropertyReader.isRuntimeKafkaEnabled()) {
+                    ScheduleTimerTask.runTimerDisableRuntimeKafka();
+                }
+            } else {
+                //TODO re-schedule the http call again
+                System.out.println("re-schedule the http call again.................in one minute");
             }
-            reader.close();
-            JSONObject obj = new JSONObject(response.toString());
-            double totalLag = obj.getJSONObject("status").getDouble("totallag");
-            if (totalLag > HEALTHCHECK_TOTALLAG && PropertyReader.isRuntimeKafkaEnabled()) {
-                ScheduleTimerTask.runTimerDisableRuntimeKafka();
+        } catch (Exception e) {
+            //TODO log the exception in log file
+            //log.error("Error while generating refresh token , ", e);
+        }
+        finally {
+            try {
+                if(closeableHttpResponse != null) {
+                    closeableHttpResponse.close();
+                }
+            } catch (IOException e) {
+                //TODO log the exception
+                e.printStackTrace();
             }
-            httpClient.close();
         }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+    }
 
+    private String buildHealthCheckUrl() {
+        StringBuilder healthCheckUrl = new StringBuilder("http://");
+        healthCheckUrl.append(PropertyReader.getKafkaProperties().get(Properties.HEALTH_CHECK_HOST))
+                .append(":")
+                .append(PropertyReader.getKafkaProperties().get(Properties.HEALTH_CHECK_PORT))
+                .append("/v3/kafka/local/consumer/")
+                .append(PropertyReader.getKafkaProperties().get(Properties.HEALTH_CHECK_CONSUMER_ID))
+                .append("/status");
+        return healthCheckUrl.toString();
     }
 
 }

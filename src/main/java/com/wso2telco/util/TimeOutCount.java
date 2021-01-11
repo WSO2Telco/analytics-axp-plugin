@@ -1,5 +1,5 @@
 package com.wso2telco.util;
-import static com.wso2telco.util.Constants.*;
+
 public class TimeOutCount {
 
     private int variable = 0;
@@ -12,7 +12,8 @@ public class TimeOutCount {
     }
 
     public int getVariable(){
-        if (System.currentTimeMillis() - this.variableUpdateMillis >= VARIABLE_FRESHNESS_THRESHOLD) {
+        if (System.currentTimeMillis() - this.variableUpdateMillis >= Long.parseLong(PropertyReader.getKafkaProperties()
+                .get(Properties.VARIABLE_FRESHNESS_THRESHOLD))) {
             this.variable = 0;
         }
         return this.variable;
