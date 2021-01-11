@@ -3,6 +3,7 @@ package com.wso2telco.mediator.log.handler;
 import com.wso2telco.kafka.MessageSender;
 import com.wso2telco.scheduler.ScheduleTimerTask;
 import com.wso2telco.util.LogHandlerUtil;
+import com.wso2telco.util.Properties;
 import com.wso2telco.util.PropertyReader;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.ManagedLifecycle;
@@ -18,18 +19,24 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.wso2telco.util.CommonConstant.*;
 
 public class SynapseLogHandler extends AbstractSynapseHandler implements ManagedLifecycle {
 
+    ExecutorService executor = null;
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
+
             PropertyReader propertyReader = new PropertyReader();
             propertyReader.readKafkaProperties();
             propertyReader.readMediatorTransactionProperties();
             PropertyReader.setInitialized(true);
+            executor = Executors.newFixedThreadPool(Integer.parseInt(PropertyReader.getKafkaProperties().
+                    get(Properties.MAX_THREAD_COUNT)));
             ScheduleTimerTask.runTimerHealthCheck();
         } catch (Exception e) {
             e.printStackTrace();
@@ -204,7 +211,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             }
 
         }
-        MessageSender messageSender = new MessageSender();
+        MessageSender messageSender = new MessageSender(executor);
         messageSender.sendMessage(transactionLog.toString());
 
     }

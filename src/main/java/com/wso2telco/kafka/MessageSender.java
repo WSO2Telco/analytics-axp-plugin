@@ -10,17 +10,20 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 
 import java.net.InetAddress;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.wso2telco.util.CommonConstant.AXP_ANALYTICS_LOGGER;
 
 public class MessageSender {
 
+    ExecutorService executorService = null;
+    public MessageSender(ExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+
     public void sendMessage(String transactionLog) {
-        ExecutorService executor = Executors.newFixedThreadPool(Integer.parseInt(PropertyReader.getKafkaProperties().
-                get(Properties.MAX_THREAD_COUNT)));
         Runnable worker = new KafkaThreadCreator(transactionLog);
-        executor.execute(worker);
+        executorService.execute(worker);
     }
 
     public static class KafkaThreadCreator implements Runnable {
