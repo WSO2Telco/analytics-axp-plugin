@@ -20,16 +20,15 @@ public class MessageSender {
         this.executorService = executorService;
     }
 
-
     public void sendMessage(String transactionLog) {
-        Runnable worker = new KafkaThreadCreator(transactionLog);
+        Runnable worker = new KafkaDataPublisher(transactionLog);
         executorService.execute(worker);
     }
 
-    public static class KafkaThreadCreator implements Runnable {
+    public static class KafkaDataPublisher implements Runnable {
 
-        private final String transactionLog;
-        KafkaThreadCreator(String transactionLog) {
+        private String transactionLog;
+        KafkaDataPublisher(String transactionLog) {
             this.transactionLog = transactionLog;
         }
 
@@ -45,9 +44,9 @@ public class MessageSender {
         public void run() {
             if (Boolean.parseBoolean(PropertyReader.getKafkaProperties().get(Properties.KAFKA_ACTIVE))
                     && PropertyReader.isRuntimeKafkaEnabled()) {
-                com.wso2telco.kafka.KafkaProducer kafkaProducer = new com.wso2telco.kafka.KafkaProducer();
-                Producer<String, String> producer = kafkaProducer.createKafkaProducer();
+                Producer<String, String> producer = com.wso2telco.kafka.KafkaProducer.createKafkaProducer();
                 int sendMessageCount = 1;
+                //TODO remove string calculations
                 String transactionLogMsg = transactionLog + ",HOSTNAME:"+ getHostname().toLowerCase();
 
                 long time = System.currentTimeMillis();
@@ -73,11 +72,13 @@ public class MessageSender {
                 } finally {
                     producer.flush();
                     producer.close();
+                    transactionLog = null;
                 }
             } else {
                 AXP_ANALYTICS_LOGGER.info(transactionLog.replaceAll(",BODY:(.*):BODY", ""));
 
             }
         }
+
     }
 }

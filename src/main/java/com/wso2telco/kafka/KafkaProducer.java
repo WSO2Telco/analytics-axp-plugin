@@ -7,7 +7,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 public class KafkaProducer {
 
-    public org.apache.kafka.clients.producer.KafkaProducer<String, String> createKafkaProducer() {
+    public static org.apache.kafka.clients.producer.KafkaProducer<String, String> createKafkaProducer() {
         //Create Producer Properties
         java.util.Properties properties = new java.util.Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, PropertyReader.getKafkaProperties()
