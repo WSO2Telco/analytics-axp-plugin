@@ -27,6 +27,7 @@ import static com.wso2telco.util.CommonConstant.*;
 public class SynapseLogHandler extends AbstractSynapseHandler implements ManagedLifecycle {
 
     ExecutorService executor = null;
+    MessageSender messageSender = null;
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
@@ -37,6 +38,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             PropertyReader.setInitialized(true);
             executor = Executors.newFixedThreadPool(Integer.parseInt(PropertyReader.getKafkaProperties().
                     get(Properties.MAX_THREAD_COUNT)));
+            messageSender = new MessageSender(executor);
             ScheduleTimerTask.runTimerHealthCheck();
         } catch (Exception e) {
             e.printStackTrace();
@@ -211,7 +213,6 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
             }
 
         }
-        MessageSender messageSender = new MessageSender(executor);
         messageSender.sendMessage(transactionLog.toString());
 
     }
