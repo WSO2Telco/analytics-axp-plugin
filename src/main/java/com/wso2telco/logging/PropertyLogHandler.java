@@ -61,6 +61,10 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
         isPayloadLoggingEnabled = extractPayloadLoggingStatus(messageContext);
 
         String direction = (String) axis2MessageContext.getProperty(MESSAGE_TYPE);
+        if (log.isDebugEnabled()) {
+            log.debug("Message ID: " + messageContext.getMessageID() + " Payload Enabled: "+ isPayloadLoggingEnabled +
+                    " Direction: "+direction);
+        }
         if (direction != null) {
             if (direction.equalsIgnoreCase(REQUEST)) {
                 logProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled, REQUEST);
@@ -71,7 +75,7 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
             }
             return true;
         } else {
-            return false;
+             return false;
         }
     }
 
@@ -149,7 +153,9 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
         try {
             payload = messageContext.getEnvelope().getBody().toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            if (log.isDebugEnabled()) {
+                log.debug("Message ID: " + messageContext.getMessageID() + " Error while getting message payload "+ e.getMessage());
+            }
             payload = "payload dropped due to invalid format";
         }
         return payload;

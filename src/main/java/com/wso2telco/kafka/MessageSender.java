@@ -3,6 +3,8 @@ package com.wso2telco.kafka;
 import com.wso2telco.scheduler.ScheduleTimerTask;
 import com.wso2telco.util.Properties;
 import com.wso2telco.util.PropertyReader;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -15,6 +17,7 @@ import static com.wso2telco.util.CommonConstant.AXP_ANALYTICS_LOGGER;
 
 public class MessageSender {
 
+    private static final Log log =  LogFactory.getLog(MessageSender.class);
     ExecutorService executorService = null;
     public MessageSender(ExecutorService executorService) {
         this.executorService = executorService;
@@ -60,13 +63,16 @@ public class MessageSender {
                         producer.send(record, new Callback() {
                             public void onCompletion(RecordMetadata metadata, Exception e) {
                                 if (e != null) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("started writing to axp-analytics-logger file since "+ e.getMessage());
+                                    }
                                     AXP_ANALYTICS_LOGGER.info(transactionLogMsg.replaceAll(",BODY:(.*):BODY", ""));
                                     PropertyReader.getErrorCount().setVariable(PropertyReader.getErrorCount().getVariable() + 1);
                                 }
                             }
                         });
                     }
-                    if ((PropertyReader.getErrorCount().getVariable() > 5) && PropertyReader.isRuntimeKafkaEnabled()) {
+                    if (PropertyReader.getErrorCount().getVariable() > 5) {
                         ScheduleTimerTask.runTimerDisableRuntimeKafka();
                     }
                 } finally {

@@ -21,11 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import static com.wso2telco.util.CommonConstant.*;
 
 public class SynapseLogHandler extends AbstractSynapseHandler implements ManagedLifecycle {
 
+    private static final Log log =  LogFactory.getLog(SynapseLogHandler.class);
     ExecutorService executor = null;
     MessageSender messageSender = null;
     @Override
@@ -40,6 +43,9 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
                     get(Properties.MAX_THREAD_COUNT)));
             messageSender = new MessageSender(executor);
             ScheduleTimerTask.runTimerHealthCheck();
+            if (log.isDebugEnabled()) {
+                log.debug("SynapseLogHandler initialization finished");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,6 +139,9 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
                 payload = messageContext.getEnvelope().toString();
             }
         } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Message ID: " + messageContext.getMessageID() + " Error while getting message payload "+ e.getMessage());
+            }
             payload = "payload dropped due to invalid format";
         }
         return payload;

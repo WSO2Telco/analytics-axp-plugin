@@ -1,6 +1,8 @@
 package com.wso2telco.util;
 
 import com.wso2telco.scheduler.ScheduleTimerTask;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,6 +20,7 @@ public class HealthCheckHttpClient {
     private static final String KAFKA_CONSUMER_OBJECT = "status";
     private static final String KAFKA_CONSUMER_STATUS_STRING = "status";
     private static final String KAFKA_CONSUMER_STATUS = "OK";
+    private static final Log log =  LogFactory.getLog(HealthCheckHttpClient.class);
 
     public void kafkaConsumerCheckHealth() {
         CloseableHttpClient httpClient = null;
@@ -46,16 +49,21 @@ public class HealthCheckHttpClient {
                 reader.close();
                 JSONObject obj = new JSONObject(response.toString());
                 String kafkaConsumerStatus = obj.getJSONObject(KAFKA_CONSUMER_OBJECT).getString(KAFKA_CONSUMER_STATUS_STRING);
+                if (log.isDebugEnabled()) {
+                    log.debug("kafka consumer status "+ kafkaConsumerStatus);
+                }
                 if (kafkaConsumerStatus.equalsIgnoreCase(KAFKA_CONSUMER_STATUS) && PropertyReader.isRuntimeKafkaEnabled()) {
                     ScheduleTimerTask.runTimerDisableRuntimeKafka();
                 }
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Kafka consumer health check return HTTP "+ statusCode );
+                }
                 //TODO re-schedule the http call again
                 System.out.println("re-schedule the http call again.................in one minute");
             }
         } catch (Exception e) {
-            //TODO log the exception in log file
-            //log.error("Error while generating refresh token , ", e);
+            log.error("Error while checking kafka consumer status "+ e.getMessage());
         }
         finally {
             try {
@@ -63,8 +71,7 @@ public class HealthCheckHttpClient {
                     closeableHttpResponse.close();
                 }
             } catch (IOException e) {
-                //TODO log the exception
-                e.printStackTrace();
+                log.error("Error while closing http client "+ e.getMessage());
             }
         }
     }
