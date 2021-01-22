@@ -197,6 +197,8 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
 
         }
 
+        if(transactionMap == null)
+            return;
         /*Check the request map and recall the init method */
         if (!PropertyReader.isInitialized()) {
             init(null);
@@ -217,7 +219,7 @@ public class SynapseLogHandler extends AbstractSynapseHandler implements Managed
                 } else if (value.equalsIgnoreCase(TH)) {
                     transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(headerMap.get(key));
                 } else {
-                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(transactionPayload.replaceAll("\n", "")).append(LOG_DATA_DELIMITER).append(entry.getKey());
+                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(transactionPayload.replace("\n", "")).append(LOG_DATA_DELIMITER).append(entry.getKey());
                 }
             }
 

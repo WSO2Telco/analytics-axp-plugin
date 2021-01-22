@@ -7,6 +7,9 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 public class KafkaProducer {
 
+    private KafkaProducer() {
+        throw new IllegalStateException("Utility class");
+    }
     public static org.apache.kafka.clients.producer.KafkaProducer<String, String> createKafkaProducer() {
         //Create Producer Properties
         java.util.Properties properties = new java.util.Properties();
@@ -23,16 +26,10 @@ public class KafkaProducer {
         properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, PropertyReader.getKafkaProperties()
                 .get(Properties.MAX_BLOCK_MS));
 
-        //kafka can detect whether it's a duplicate data based on the producer request id.
-
-        //Create high throughput Producer at the expense of latency & CPU
-        //properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
-        //properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "60");
         properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(100 * 1024)); //32KB batch size
 
         //Create Kafka Producer
-        org.apache.kafka.clients.producer.KafkaProducer<String, String> logProducer = new org.apache.kafka.clients.producer.KafkaProducer<String, String>(properties);
-        return logProducer;
+        return new org.apache.kafka.clients.producer.KafkaProducer<>(properties);
     }
 
 }

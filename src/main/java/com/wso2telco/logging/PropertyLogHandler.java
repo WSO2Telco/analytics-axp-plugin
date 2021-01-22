@@ -119,7 +119,7 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
                 } else if (value.equalsIgnoreCase(TH)) {
                     transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(headerMap.get(key));
                 } else {
-                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(transactionPayload.replaceAll("\n", ""));
+                    transactionLog.append(LOG_MESSAGE_DELIMITER).append(entry.getKey()).append(LOG_DATA_DELIMITER).append(transactionPayload.replace("\n", ""));
                 }
 
 
@@ -162,21 +162,5 @@ public class PropertyLogHandler extends AbstractMediator implements ManagedLifec
 
     }
 
-    /**
-     * this method can be used if we need to get extract only json as body
-     **/
-    private String getPayloadSting(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2MessageContext) {
-        String payload;
-        if (axis2MessageContext.getProperty(CONTENT_TYPE).equals(APPLICATION_JSON)) {
-            /**if content type is json */
-            payload = XML.toJSONObject(messageContext.getEnvelope().getBody().getFirstElement().getFirstElement().toString()).toString();
-        } else if (axis2MessageContext.getProperty(CONTENT_TYPE).equals(TEXT_PLAIN)) {
-            /**if content type is text/plain */
-            payload = messageContext.getEnvelope().getBody().getFirstElement().toString();
-        } else {
-            /** if content type is xml */
-            payload = messageContext.getEnvelope().getBody().toString();
-        }
-        return payload;
-    }
+
 }
