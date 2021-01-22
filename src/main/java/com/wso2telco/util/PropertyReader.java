@@ -124,7 +124,7 @@ public class PropertyReader {
             while (e.hasMoreElements()) {
                 String key = (String) e.nextElement();
                 String value = prop.getProperty(key);
-                System.out.println("key" + key + "           ........... value "+ value);
+                
                 kafkaProperties.put(key, value);
             }
 

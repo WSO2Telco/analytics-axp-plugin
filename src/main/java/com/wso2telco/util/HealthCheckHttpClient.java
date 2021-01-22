@@ -60,7 +60,6 @@ public class HealthCheckHttpClient {
                     log.debug("Kafka consumer health check return HTTP "+ statusCode );
                 }
                 //TODO re-schedule the http call again
-                System.out.println("re-schedule the http call again.................in one minute");
             }
         } catch (Exception e) {
             log.error("Error while checking kafka consumer status "+ e.getMessage());
