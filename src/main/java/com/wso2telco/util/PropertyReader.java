@@ -2,6 +2,8 @@ package com.wso2telco.util;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,7 +25,7 @@ import static com.wso2telco.util.CommonConstant.*;
 
 @Getter
 public class PropertyReader {
-
+    private static final Log log =  LogFactory.getLog(PropertyReader.class);
     @Getter
     static HashMap<String, String> kafkaProperties = new HashMap<>();
     @Getter
@@ -122,21 +124,18 @@ public class PropertyReader {
             while (e.hasMoreElements()) {
                 String key = (String) e.nextElement();
                 String value = prop.getProperty(key);
-                //TODO remove sout
-                System.out.println("KEY.."+ key);
-                System.out.println("VALUE.."+ value);
+                
                 kafkaProperties.put(key, value);
             }
 
         } catch (IOException ex) {
-            //TODO log error message
-            ex.printStackTrace();
+            log.error("Error while reading property file "+ ex.getMessage());
         } finally {
             if (input != null) {
                 try {
                     input.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Error while closing file reading operation " + e.getMessage());
                 }
             }
         }
@@ -161,9 +160,8 @@ public class PropertyReader {
             NodeList responseoutAttributes = document.getElementsByTagName(RESPONSE_OUT.toUpperCase());
             PropertyReader.setLogProperties(responseoutAttributes, RESPONSE_OUT);
         } catch (SAXException | ParserConfigurationException | IOException e) {
-            e.printStackTrace();
+            log.error("Error while reading Mediator Transaction property file "+ e.getMessage());
         }
-        //TODO check file close operation required or not
     }
 
     public void readGatewayTransactionProperties() {
@@ -182,8 +180,7 @@ public class PropertyReader {
             NodeList errorAttributes = document.getElementsByTagName(ERROR_RESPONSE.toUpperCase());
             PropertyReader.setLogProperties(errorAttributes, ERROR_RESPONSE);
         } catch (SAXException | ParserConfigurationException | IOException er) {
-            er.printStackTrace();
+            log.error("Error while reading Gateway Transaction property file "+ er.getMessage());
         }
-        //TODO check file close operation required or not
     }
 }

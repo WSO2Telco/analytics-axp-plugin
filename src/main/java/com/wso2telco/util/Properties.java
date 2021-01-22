@@ -4,9 +4,10 @@ public class Properties {
 
     /* Kafka consumer related */
     public static final String HEALTH_CHECK_ACTIVE = "healthcheck.active";
-    public static final String CONSUMER_HEALTH_CHECK_FRESHNESS_THRESHOLD = "consumer.healthCheck.freshness.threshold";
-    public static final String VARIABLE_FRESHNESS_THRESHOLD = "variable.freshness.threshold";
-    public static final String RUN_TIME_KAFKA_FRESHNESS_THRESHOLD = "runtimekafka.freshness.threshold";
+    public static final String CONSUMER_HEALTH_CHECK_FRESHNESS_THRESHOLD = "consumer.healthCheck.freshness.time";
+    // TODO error.count.freshness.threshold
+    public static final String VARIABLE_FRESHNESS_THRESHOLD = "variable.freshness.time";
+    public static final String RUN_TIME_KAFKA_FRESHNESS_THRESHOLD = "runtimekafka.freshness.time";
     public static final String HEALTH_CHECK_CONSUMER_ID = "healthCheck.consumer.id";
     public static final String HEALTH_CHECK_HOST = "healthCheck.host";
     public static final String HEALTH_CHECK_PORT = "healthCheck.port";

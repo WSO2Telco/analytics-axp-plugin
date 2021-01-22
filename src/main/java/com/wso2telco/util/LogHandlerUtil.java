@@ -2,6 +2,8 @@ package com.wso2telco.util;
 
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseLog;
@@ -19,6 +21,7 @@ import static com.wso2telco.util.CommonConstant.*;
 public class LogHandlerUtil {
     private static org.apache.axis2.context.MessageContext axis2MessageContext;
     private static Map<String, Object> headerMap;
+    private static final Log log =  LogFactory.getLog(LogHandlerUtil.class);
 
     private LogHandlerUtil() {
         throw new IllegalStateException("Utility class");
@@ -84,7 +87,7 @@ public class LogHandlerUtil {
             }
             messageContext.setProperty(esbMapping, trackingMessageId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error while generating tracking ID "+ e.getMessage());
         }
 
     }
@@ -97,7 +100,7 @@ public class LogHandlerUtil {
         try {
             trackingMessageId = headerMap.get(TRACKING_MESSAGE_ID).toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error while getting tracking ID from headerMap "+ e.getMessage());
         }
         if (trackingMessageId == null) {
             trackingMessageId = context.getMessageID();
