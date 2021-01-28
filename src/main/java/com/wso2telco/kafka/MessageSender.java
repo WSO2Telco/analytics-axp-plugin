@@ -44,13 +44,13 @@ public class MessageSender {
         public void run() {
             if (Boolean.parseBoolean(PropertyReader.getKafkaProperties().get(Properties.KAFKA_ACTIVE))
                     && PropertyReader.isRuntimeKafkaEnabled()) {
-               run2();
+               sendToKafka();
             } else {
                 AXP_ANALYTICS_LOGGER.info(transactionLog.replaceAll(",BODY:(.*):BODY", ""));
 
             }
         }
-        private void run2(){
+        private void sendToKafka(){
             Producer<String, String> producer = com.wso2telco.kafka.KafkaProducer.createKafkaProducer();
             int sendMessageCount = 1;
             //TODO remove string calculations
