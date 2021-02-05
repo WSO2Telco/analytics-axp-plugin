@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
+import scala.collection.mutable.StringBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,12 +24,10 @@ public class HealthCheckHttpClient {
     private static final Log log =  LogFactory.getLog(HealthCheckHttpClient.class);
 
     public void kafkaConsumerCheckHealth() {
-        CloseableHttpClient httpClient = null;
         CloseableHttpResponse closeableHttpResponse = null;
 
-        try{
+        try(CloseableHttpClient httpClient =HttpClients.createDefault()){
             String healthCheckUrl = buildHealthCheckUrl();
-            httpClient = HttpClients.createDefault();
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000).setConnectionRequestTimeout(5000).build();
             HttpGet httpGet = new HttpGet(healthCheckUrl);
             httpGet.setConfig(requestConfig);
@@ -41,7 +40,7 @@ public class HealthCheckHttpClient {
                         closeableHttpResponse.getEntity().getContent()));
 
                 String inputLine;
-                StringBuffer response = new StringBuffer();
+                StringBuilder response = new StringBuilder();
 
                 while ((inputLine = reader.readLine()) != null) {
                     response.append(inputLine);

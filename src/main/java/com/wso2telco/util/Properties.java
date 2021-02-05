@@ -2,6 +2,10 @@ package com.wso2telco.util;
 
 public class Properties {
 
+    private Properties() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /* Kafka consumer related */
     public static final String HEALTH_CHECK_ACTIVE = "healthcheck.active";
     public static final String CONSUMER_HEALTH_CHECK_FRESHNESS_THRESHOLD = "consumer.healthCheck.freshness.time";

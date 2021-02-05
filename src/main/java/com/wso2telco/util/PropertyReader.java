@@ -14,10 +14,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.Properties;
 
@@ -27,18 +24,18 @@ import static com.wso2telco.util.CommonConstant.*;
 public class PropertyReader {
     private static final Log log =  LogFactory.getLog(PropertyReader.class);
     @Getter
-    static HashMap<String, String> kafkaProperties = new HashMap<>();
+    private static HashMap<String, String> kafkaProperties = new HashMap<>();
     @Getter
-    public static boolean requestInEnabled = false;
+    private static boolean requestInEnabled = false;
     @Getter
-    public static boolean requestOutEnabled = false;
+    private static boolean requestOutEnabled = false;
     @Getter
-    public static boolean responseInEnabled = false;
+    private static boolean responseInEnabled = false;
     @Getter
-    public static boolean responseOutEnabled = false;
+    private static boolean responseOutEnabled = false;
     @Getter
     @Setter
-    public static boolean initialized = false;
+    private static boolean initialized = false;
     @Getter
     private static HashMap<String, String> requestpropertyMap = new LinkedHashMap<>();
     @Getter
@@ -112,32 +109,22 @@ public class PropertyReader {
     public void readKafkaProperties() {
 
         java.util.Properties prop = new Properties();
-        InputStream input = null;
 
-        try {
-            String absolutePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + CommonConstant.KAFKA_CONFIGURATION_FILE;
-            input = new FileInputStream(absolutePath);
+        String absolutePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + CommonConstant.KAFKA_CONFIGURATION_FILE;
 
-            // load a properties file
+        try(InputStream input = new FileInputStream(absolutePath)){
             prop.load(input);
             Enumeration<?> e = prop.propertyNames();
             while (e.hasMoreElements()) {
                 String key = (String) e.nextElement();
                 String value = prop.getProperty(key);
-                
+
                 kafkaProperties.put(key, value);
             }
-
-        } catch (IOException ex) {
+        } catch (FileNotFoundException ex) {
             log.error("Error while reading property file "+ ex.getMessage());
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    log.error("Error while closing file reading operation " + e.getMessage());
-                }
-            }
+        } catch (IOException e) {
+            log.error("Error while accessing the file " + e.getMessage());
         }
 
     }
